@@ -22,5 +22,5 @@ if __name__ == '__main__':
 
     # 가변적 ---------------------------------------------------------------
     DataPlot.draw_band(model, model.get_band_data(), is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
-    DataPlot.draw_rsd(model, model.get_rsd_data(states, path=1), log=True)
+    DataPlot.draw_rsd(model, model.get_rsd_data(states, path=4), log=False)
     DataPlot.draw_2D_rsd(model, model.get_2D_rsd_data(states))
