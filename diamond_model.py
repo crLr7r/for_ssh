@@ -55,15 +55,18 @@ class Diamond(System):
         def next_n_n(i):
             s1, s2, s3 = s_decomp(i)
             list = []
+            weight = []
 
             candi = [[s1, s2 - 1, s3 - 1], [s1, s2, s3 - 1],
                               [s1, s2 - 1, s3], [s1, s2 + 1, s3],
                               [s1, s2, s3 + 1], [s1, s2 + 1, s3 + 1]]
-            for next_n_n in candi:
+            weight_candi = [site * w for w in [1, -1, -1, 1, 1, -1]]
+            for i, next_n_n in enumerate(candi):
                 if 0 <= next_n_n[0] < 2 and 0 <= next_n_n[1] < n and 0 <= next_n_n[2] < m:
                     list.append(next_n_n)
+                    weight.append(weight_candi[i])
 
-            return list
+            return list, weight
 
         def set_elt(M, i, j, val):
             if i < 0 or j < 0: return
@@ -95,8 +98,8 @@ class Diamond(System):
         H_SOC = np.zeros((self.basis_num, self.basis_num), dtype=complex)
         for i in range(self.basis_num):
             site = 1 if i % (n * 2) < n else -1  # a-site랑 b-site 구분
-            next_n_n_list = next_n_n(i)
-            weight = [site * w for w in [1, -1, -1, 1, 1, -1]]
+            next_n_n_list, weight = next_n_n(i)
+
             for j in range(self.basis_num):
                 j_decomp = s_decomp(j)
                 if j_decomp in next_n_n_list:
@@ -170,15 +173,15 @@ class Diamond(System):
             path_name = "b-site edge"
 
         elif path == 3:  # 가로 지그재그
-            for i in range(m):
+            for i in range(min(n,m)):
                 a = i * (2 * n + 1)
                 path_sites.append(a)  # a-site
-                if i < m - 1:  # a에서 시작해서 a에서 끝나기 때문
+                if i < min(n,m) - 1:  # a에서 시작해서 a에서 끝나기 때문
                     path_sites.append(a + n + 1)  # b-site
             path_name = "horizontal zigzag"
 
         elif path == 4:  # 세로
-            for i in range(m):
+            for i in range(min((n,m))):
                 a = n - 1 + i * (2 * n - 1)
                 b = a + n
                 path_sites.append(a)
