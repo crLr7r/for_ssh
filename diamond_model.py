@@ -8,8 +8,6 @@ class Diamond(System):
 
     param_names = 'Delta t t_SO lda B n m'.split()
     name = "Diamond"
-    kmin = 0
-    kmax = 0
 
     # 인스턴스 함수 정의--------------------------------------------------------------------------------------------
     def __init__(self, a, params):
@@ -141,7 +139,7 @@ class Diamond(System):
 
         E_bounds = self.get_E_bounds()
 
-        band_data = state_list, size, color, E_bounds
+        band_data = state_list, size, color, E_bounds, ""
         return band_data
 
     def get_path(self, path=0):  # spin 고려 x

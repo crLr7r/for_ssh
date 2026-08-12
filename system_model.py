@@ -9,21 +9,6 @@ class System(ABC):
 
     param_names = None
     name = None
-    kmin = None
-    kmax = None
-
-    #클래스 함수 -----------------------------------------------------------
-
-    @classmethod
-    def get_klist(cls):
-        return np.linspace(cls.kmin, cls.kmax, cls.KPOINTS)
-
-    @classmethod
-    def set_kspace_data(cls):
-        cls.klabel = None
-        cls.line_indicator = None
-        cls.spec_indices = None
-
 
     # 인스턴스 함수 정의--------------------------------------------------------
     @abstractmethod
@@ -31,10 +16,20 @@ class System(ABC):
 
         self.a = a
         self.params = params
+
+        self.kmin, self.kmax = 0, 0
         self.klist = self.get_klist()
 
         self.basis_num = None
         self.filename = None
+
+    def get_klist(self):
+        return np.linspace(self.kmin, self.kmax, self.KPOINTS)
+
+    def set_kspace_data(self):
+        self.klabel = None
+        self.line_indicator = None
+        self.spec_indices = None
 
     # 그래프나 사진 이름 지정
     def set_title(self, title=None):

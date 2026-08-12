@@ -1,7 +1,9 @@
 import numpy as np
 from diamond_model import Diamond
+from ribbon_zeeman_model import Ribbon_zeeman
 
 import sys
+
 
 def diagonalize(model, do_print=False):
     evals_list, evecs_list = [], []
@@ -15,7 +17,7 @@ def diagonalize(model, do_print=False):
 
         if do_print:
             for eval, evec in zip(evals, evecs):
-                print(eval, evec)
+                print(f"{eval:3.5f}, {evec}")
 
     return np.asarray(evals_list), np.asarray(evecs_list)
 
@@ -37,6 +39,11 @@ if __name__ == "__main__":
 
     model = None
     if model_name == 'Diamond':
+        #Diamond 1 0 1 0.1 0.2 1 30 31
         model = Diamond(a, params)
+
+    if model_name == 'Ribbon_zeeman':
+        #Ribbon_zeeman 1 0 1 0.1 0.2 1 55
+        model = Ribbon_zeeman(a, params)
 
     save_eigen_data(model)

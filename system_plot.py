@@ -40,9 +40,9 @@ class DataPlot():
     @staticmethod
     def draw_band(model, band_data,
                   ax=None, title=None, fig_size=(6.4, 4.8),
-                  is_kspace=True, is_E_bounded=True, is_x_bounded=False, is_last=True):
+                  is_kspace=True, is_E_bounded=True, is_x_bounded=False, is_text=False, is_last=True):
 
-        state_list, size, color, E_bounds = band_data
+        state_list, size, color, E_bounds, textstr = band_data
 
         if ax is None:
             if is_kspace:
@@ -58,8 +58,8 @@ class DataPlot():
 
         if len(model.evals_list) > 1:
             evals_list = model.evals_list.T
-            for Elist in evals_list:
-                ax.scatter(state_list, Elist, s=size, color=color)
+            for i, Elist in enumerate(evals_list):
+                ax.scatter(state_list, Elist, s=size, color=color[i])
         else:
             ax.scatter(state_list, model.evals_list[0], s=size, color=color)
             if is_E_bounded and is_x_bounded:
@@ -67,11 +67,37 @@ class DataPlot():
                                 state_list[DataPlot.find_closest_idx(model.evals_list[0], E_bounds[1], smaller=False)])
                 ax.set_xlim(x_min, x_max)
 
+        if is_text:
+            ax.text(0.05, 0.55, textstr,
+                    transform=ax.transAxes,
+                    fontsize=11,
+                    verticalalignment='top',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.8, edgecolor='gray'))
+
         if is_last:
             ax.set_ylabel('E(k)') if is_kspace else ax.set_ylabel('E')
             if not is_kspace: ax.set_xlabel('state')
             fig.tight_layout()
             fig.savefig(f"{model.name}_band({model.title}).png")
+            plt.show()
+            plt.close(fig)
+
+    @staticmethod
+    def draw_kspace_val(model, val_data,
+                        ax = None, title = None, fig_size = (6.4, 4.8), is_last = True):
+        y_list, y_name, size = val_data
+
+        if ax is None:
+            fig, ax, created_fig = DataPlot.set_kspace_diagram(model, ax=ax, title=title, fig_size=fig_size)
+        else:
+            fig = ax.figure
+
+        ax.scatter(model.klist, y_list, s=size, label=y_name)
+
+        if is_last:
+            ax.set_ylabel(y_name)
+            fig.tight_layout()
+            fig.savefig(f"{model.name}_{y_name}({model.title}).png")
             plt.show()
             plt.close(fig)
 
@@ -100,10 +126,10 @@ class DataPlot():
         is_increase = True
         prev_y = ylist[0]
         for i, y in enumerate(ylist[1::]):
-            if prev_y - y > 0.01:  # 의미있는 감소를 했는데
+            if prev_y - y > 0.0001:  # 의미있는 감소를 했는데
                 if is_increase: peak_idx_list.append(i)  # 이전까지 증가했을 때(i-1이 아니라 i임 주의)
                 is_increase = False
-            elif prev_y - y < -0.01:  # 의미있는 증가만 증가로 취급
+            elif prev_y - y < -0.0001:  # 의미있는 증가만 증가로 취급
                 is_increase = True
             else:
                 is_increase = False
