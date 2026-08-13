@@ -14,27 +14,29 @@ class Diamond(System):
         super().__init__(a, params)
         self.params[5] = int(params[5])
         self.params[6] = int(params[6])
-        self.filename = f"diamond_delta={self.params[0]}_n={self.params[5]}_m={self.params[6]}.npz"
+        self.filename = f"diamond_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}_m={self.params[6]}.npz"
         self.basis_num = int(2 * self.params[5] * self.params[6])    # spin 고려 안 한 기저 개수
         self.state_list = np.asarray(range(self.basis_num * 2))  # state에 번호 붙인 리스트, spin 고려 o
         self.corner_states = None
+    
+    def s_decomp(self, i):
+        n = self.params[5]
+        s1 = 0 if i % (2 * n) < n else 1
+        s2 = i % (2 * n) - n * s1
+        s3 = i // (2 * n)
 
+        return [s1, s2, s3]
+
+    def s_comp(self,s1, s2, s3):
+        n = self.params[5]
+        return n * s1 + s2 + 2 * n * s3
+    
     def H(self, k):
         delta, t, t_SO, lda, B, n, m = self.params
         a = self.a
 
-        def s_decomp(i):
-            s1 = 0 if i % (2 * n) < n else 1
-            s2 = i % (2 * n) - n * s1
-            s3 = i // (2 * n)
-
-            return [s1, s2, s3]
-
-        def s_comp(s1, s2, s3):
-            return n * s1 + s2 + 2 * n * s3
-
         def n_n(i):
-            s1, s2, s3 = s_decomp(i)
+            s1, s2, s3 = self.s_decomp(i)
             list = []
 
             s1_new = s1 + (-1) ** s1
@@ -53,7 +55,7 @@ class Diamond(System):
             return list
 
         def next_n_n(i):
-            s1, s2, s3 = s_decomp(i)
+            s1, s2, s3 = self.s_decomp(i)
             list = []
             weight = []
 
@@ -61,6 +63,7 @@ class Diamond(System):
                               [s1, s2 - 1, s3], [s1, s2 + 1, s3],
                               [s1, s2, s3 + 1], [s1, s2 + 1, s3 + 1]]
             weight_candi = [site * w for w in [1, -1, -1, 1, 1, -1]]
+            
             for i, next_n_n in enumerate(candi):
                 if 0 <= next_n_n[0] < 2 and 0 <= next_n_n[1] < n and 0 <= next_n_n[2] < m:
                     list.append(next_n_n)
@@ -80,7 +83,7 @@ class Diamond(System):
         for i in range(self.basis_num):
             n_n_list = n_n(i)
             for j in range(self.basis_num):
-                j_decomp = s_decomp(j)
+                j_decomp = self.s_decomp(j)
                 if j_decomp in n_n_list:
                     set_elt(H_hop, i, j, -t)
 
@@ -101,7 +104,7 @@ class Diamond(System):
             next_n_n_list, weight = next_n_n(i)
 
             for j in range(self.basis_num):
-                j_decomp = s_decomp(j)
+                j_decomp = self.s_decomp(j)
                 if j_decomp in next_n_n_list:
                     set_elt(H_SOC, i, j, weight[next_n_n_list.index(j_decomp)] * 1j * t_SO)
 
@@ -113,16 +116,21 @@ class Diamond(System):
         S_y = np.array([[0, -1j], [1j, 0]])
 
         # Hamiltonian
-        return (np.kron(H_hop + H_on_site, I)
+        H = (np.kron(H_hop + H_on_site, I)
               + np.kron(H_SOC, S_z)
               + np.kron(H_zeeman, S_y))
+        print(H)
+        return H
 
     # corner state setting method
     def set_corner_states(self):
         self.corner_states = []
-        for x in self.state_list:
-            if np.isclose(self.evals_list[0][x], 0, atol=0.1, rtol=0.1):
-                self.corner_states.append(x)
+        prev_E = self.evals_list[0][0]
+        for x in self.state_list[1:]:   # 첫 번째 값은 제외하고 시작
+            E = self.evals_list[0][x]
+            if prev_E < 0 and E > 0:
+                self.corner_states = [x - 1, x]
+            prev_E = E
 
     # y축 범위
     def get_E_bounds(self):
