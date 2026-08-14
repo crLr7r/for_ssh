@@ -78,7 +78,7 @@ class DataPlot():
             ax.set_ylabel('E(k)') if is_kspace else ax.set_ylabel('E')
             if not is_kspace: ax.set_xlabel('state')
             fig.tight_layout()
-            fig.savefig(f"{model.name}_band({model.title}).png")
+            fig.savefig(f"images/{model.name}_band({model.title}).png")
             plt.show()
             plt.close(fig)
 
@@ -97,7 +97,7 @@ class DataPlot():
         if is_last:
             ax.set_ylabel(y_name)
             fig.tight_layout()
-            fig.savefig(f"{model.name}_{y_name}({model.title}).png")
+            fig.savefig(f"images/{model.name}_{y_name}({model.title}).png")
             plt.show()
             plt.close(fig)
 
@@ -180,7 +180,7 @@ class DataPlot():
             ax.set_xticks(*xticks)
 
             fig.tight_layout()
-            fig.savefig(f"{model.name}_{path}_rsd_k({model.title}).png")
+            fig.savefig(f"images/{model.name}_{path}_rsd_k({model.title}).png")
 
             plt.show()
             plt.close()
@@ -234,5 +234,5 @@ class DataPlot():
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         ax.set_title(model.title)
-        fig.savefig(f"{model.name}_rsd_2D({model.title}).png")
+        fig.savefig(f"images/{model.name}_rsd_2D({model.title}).png")
         plt.show()
