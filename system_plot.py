@@ -52,6 +52,7 @@ class DataPlot():
                 model.set_title(title=title)
         else:
             fig = ax.figure
+            model.set_title(title=title)
 
         if is_E_bounded:
             ax.set_ylim(E_bounds[0], E_bounds[1])
@@ -81,6 +82,8 @@ class DataPlot():
             fig.savefig(f"images/{model.name}_band({model.title}).png")
             plt.show()
             plt.close(fig)
+        
+        return ax
 
     @staticmethod
     def draw_kspace_val(model, val_data,
@@ -143,7 +146,7 @@ class DataPlot():
                  ax=None, title=None,
                  fig_size=(10, 5), is_line=True, log=False, is_last=True):
 
-        #idx_list: 그래프를 여러개 그린다고 했을 때 그래프끼리 구분해주는 list
+        #states: 그래프를 여러개 그린다고 했을 때 그래프끼리 구분해주는 list
         xlist, density_list, states, xlabels, step, path, color_list = rsd_data
 
         model.set_title(title=title)

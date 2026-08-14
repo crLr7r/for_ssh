@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+from scipy.optimize import curve_fit
 
 class System(ABC):
     # 클래스 변수 -----------------------------------------------------------
@@ -44,7 +45,7 @@ class System(ABC):
 
 
     @abstractmethod
-    def H(self, k):
+    def H(self, k, k_y=0):
         pass
 
     def load_eigen_data(self):
@@ -64,4 +65,48 @@ class System(ABC):
     def get_2D_rsd_data(self, idx_list, spin=None):
         pass
 
+     # 어떤 xlist, dlist 데이터에 대해 지수 감쇠 모델을 피팅하는 함수
+    def get_exp_fit(self, xlist, dlist, log=True):  # xi_0: 초기 추정값
+        x = np.asarray(xlist)
+        y = np.asarray(dlist)
+
+        if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
+
+        # 피팅할 함수: 지수 감쇠 함수
+        def exp_dissolve(x, A, B, xi, C):
+            return A * np.exp(-np.abs(x - B) / xi) + C
+
+        # 피팅할 함수2: 세미로그 함수
+        def exp_log_dissolve(x, A, B, xi, C):
+            return np.log(A) - np.abs(x - B) / xi
+
+        # 초기 추정값
+        C0 = np.min(y)
+        B0 = x[np.argmax(y)]
+        xi0 = (x[-1] - x[0]) / 5
+        A0 = np.max(y) - C0
+
+        # 로그 스케일일 경우
+        fit_func = exp_dissolve
+        if log:
+            y = np.log(np.maximum(y, 1e-13))
+            fit_func = exp_log_dissolve
+            for idx in range(len(y)):
+                if idx == 0: continue
+                if np.isclose(y[idx], y[idx - 1], rtol=1e-8, atol=1e-10):
+                    y = y[:idx]
+                    x = x[:idx]
+                    break
+
+        # 피팅
+        parameters, _ = curve_fit(
+            fit_func,
+            x,
+            y,
+            p0=[A0, B0, xi0, C0],  # A, B, xi, C의 초기 추정값
+            bounds=([0, 0, 1e-10, 0], [np.inf, np.inf, np.inf, np.inf]),
+            maxfev=100000
+        )
+
+        return parameters
 

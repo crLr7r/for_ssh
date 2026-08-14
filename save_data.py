@@ -1,7 +1,4 @@
 import numpy as np
-from diamond_model import Diamond
-from ribbon_zeeman_model import Ribbon_zeeman
-
 import sys
 
 
@@ -40,10 +37,21 @@ if __name__ == "__main__":
     model = None
     if model_name == 'Diamond':
         #Diamond 1 0 1 0.1 0.2 1 30 31
+        from diamond_model import Diamond
         model = Diamond(a, params)
+        save_eigen_data(model)
 
-    if model_name == 'Ribbon_zeeman':
-        #Ribbon_zeeman 1 0 1 0.1 0.2 1 55
-        model = Ribbon_zeeman(a, params)
+    if model_name == 'Ribbon':
+        #Ribbon 1 0 1 0.1 0.2 1 55
+        from ribbon_model import Ribbon
+        model = Ribbon(a, params)
+        save_eigen_data(model)
 
-    save_eigen_data(model)
+    if model_name == 'Bulk':
+        #Bulk 1 0 1 0.1
+        from bulk_model import Bulk
+        for k_y in np.linspace(0, 2*np.pi/(np.sqrt(3)*a) , 3):
+            model = Bulk(a, params, k_y=k_y)
+            save_eigen_data(model)
+
+    #

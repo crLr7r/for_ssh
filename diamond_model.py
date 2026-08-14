@@ -119,7 +119,7 @@ class Diamond(System):
         H = (np.kron(H_hop + H_on_site, I)
               + np.kron(H_SOC, S_z)
               + np.kron(H_zeeman, S_y))
-        print(H)
+        #print(H)
         return H
 
     # corner state setting method
@@ -135,7 +135,10 @@ class Diamond(System):
     # y축 범위
     def get_E_bounds(self):
         self.is_E_bounded = True
-        E_bounds = [-0.3, 0.3]
+        self.set_corner_states()
+        last_E = self.evals_list[0][self.corner_states[1] + 16]
+        E_bound = np.ceil(last_E * 10) / 10
+        E_bounds = [-E_bound, E_bound]
         return E_bounds
 
     def get_band_data(self):

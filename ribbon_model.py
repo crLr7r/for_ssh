@@ -1,21 +1,19 @@
-from scipy.optimize import curve_fit
-
 from system_model import System
 import numpy as np
 
-class Ribbon_zeeman(System):
+class Ribbon(System):
     # 클래스 변수 -----------------------------------------------------------
     KPOINTS = 501
     MAX_TICKS = 16
 
     param_names = 'Delta t t_SO lda B n'.split()
-    name = "Ribbon_zeeman"
+    name = "Ribbon"
 
     # 인스턴스 함수 정의--------------------------------------------------------------------------------------------
     def __init__(self, a, params):
         super().__init__(a, params)
         self.params[5] = int(params[5])
-        self.filename = f"Ribbon_zeeman_delta={self.params[0]}_n={self.params[5]}.npz"
+        self.filename = f"Ribbon_delta={self.params[0]}_n={self.params[5]}.npz"
         self.basis_num = int(2 * (self.params[5] + 1))  # spin 고려 안 한 기저 개수
         self.kmin, self.kmax = 0, 2 * np.pi / self.a
         self.klist = self.get_klist()
@@ -173,51 +171,6 @@ class Ribbon_zeeman(System):
             prev_idx = this_idx
 
         return band_idxs, spin, edge
-
-    # 어떤 real space 데이터에 대해 localization length 구하는 함수
-    def get_exp_fit(self, xlist, dlist, log=True):  # xi_0: 초기 추정값
-        x = np.asarray(xlist)
-        y = np.asarray(dlist)
-
-        if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
-
-        # 피팅할 함수: 지수 감쇠 함수
-        def exp_dissolve(x, A, B, xi, C):
-            return A * np.exp(-np.abs(x - B) / xi) + C
-
-        # 피팅할 함수2: 세미로그 함수
-        def exp_log_dissolve(x, A, B, xi, C):
-            return np.log(A) - np.abs(x - B) / xi
-
-        # 초기 추정값
-        C0 = np.min(y)
-        B0 = x[np.argmax(y)]
-        xi0 = (x[-1] - x[0]) / 5
-        A0 = np.max(y) - C0
-
-        # 로그 스케일일 경우
-        fit_func = exp_dissolve
-        if log:
-            y = np.log(np.maximum(y, 1e-13))
-            fit_func = exp_log_dissolve
-            for idx in range(len(y)):
-                if idx == 0: continue
-                if np.isclose(y[idx], y[idx - 1], rtol=1e-8, atol=1e-10):
-                    y = y[:idx]
-                    x = x[:idx]
-                    break
-
-        # 피팅
-        parameters, _ = curve_fit(
-            fit_func,
-            x,
-            y,
-            p0=[A0, B0, xi0, C0],  # A, B, xi, C의 초기 추정값
-            bounds=([0, 0, 1e-10, 0], [np.inf, np.inf, np.inf, np.inf]),
-            maxfev=100000
-        )
-
-        return parameters
 
     def set_kspace_data(self):
         self.klabel = [[self.kmin, self.kmax/2, self.kmax]
