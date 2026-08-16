@@ -16,10 +16,11 @@ if __name__ == '__main__':
         is_kspace = False
         model.load_eigen_data()
         model.set_corner_states()
-
+        ax = None
         # 가변적 data ---------------------------------------------------------
         states = model.corner_states
         n,m = model.params[5], model.params[6]
+
         '''
         #대각화 잘 됐는지 체크
         LHS = model.H(0) @ model.evecs_list[0][states[0]]
@@ -28,7 +29,7 @@ if __name__ == '__main__':
         '''
         band_data = model.get_band_data()
         rsd_data = model.get_rsd_data([states[1]], path=1)
-        rsd_2D_data = model.get_2D_rsd_data([states[1]])
+        rsd_2D_data = model.get_2D_rsd_data([states[0]])
         
         xlist, dlist, _, _, _, _, _ = rsd_data
         xlist = xlist[:len(xlist)//2]
@@ -39,27 +40,31 @@ if __name__ == '__main__':
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(xlist,A * np.exp(-np.abs(xlist - B) / xi),color='green')
 
-        #print(f"band gap = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
+        print(f"band gap = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
         print(f"E1={model.evals_list[0][states[0]]:.14f}, E2={model.evals_list[0][states[1]]:.14f}")
-        
-        e = [(1, 0, 2), (1, 0, 1), (1, 0, 0), (0, 0, 0),(0, 1, 0), (0, 2, 0), (0, n-1, m-3), (0, n-1, m-2), (0, n-1, m-1), (1, n-1, m-1), (1, n-2, m-1), (1, n-3, m-1)]
+        model.get_total_density(states[0])
+
+        extra = [(1, 1, 1), (0, 1, 1)]
+        e = [(1, 0, 3), (1, 0, 2), (1, 0, 1), (0, 0, 1), (1, 0, 0), (0, 0, 0), (1, 1, 0), (0, 1, 0), (0, 2, 0), (0, 3, 0)]
         density_list = []
+        e_list = []
         for i, s in enumerate(e):
             site = [2*model.s_comp(*s), 2*model.s_comp(*s)+1]
-            elt = [model.evecs_list[0][states[0]][site[0]], model.evecs_list[0][states[0]][site[1]]]
-            print(f"e{i+1} = ({elt[0]:.4f}, {elt[1]:.4f})")
+            elt = [model.evecs_list[0][states[1]][site[0]], model.evecs_list[0][states[1]][site[1]]]
+            #print(f"e{i+1}' = ({elt[0]:.10f}, {elt[1]:.10f})")
             density = np.abs(elt[0])**2 + np.abs(elt[1])**2
             density_list.append(density)
+            for elt_i in elt: e_list.append(elt_i)
             #print(f"e{i+1}^2 = {density:.4f}")
-        
+        #for e_i in e_list: print(f"{e_i:.10f}", end=", ")
         #print(f"corner site density={density_list[5]:.4f}")
         #print(f"decay(lda={model.params[3]})={density_list[5] - density_list[7]:.15f}")
 
         # plot ---------------------------------------------------------------
         
-        #DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
+        DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
         DataPlot.draw_rsd(model, rsd_data, log=False, ax=ax)
-        #DataPlot.draw_2D_rsd(model, rsd_2D_data)
+        DataPlot.draw_2D_rsd(model, rsd_2D_data)
         
 
     elif model_name == 'Ribbon':
