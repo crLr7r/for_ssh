@@ -61,9 +61,9 @@ if __name__ == '__main__':
         #print(f"decay(lda={model.params[3]})={density_list[5] - density_list[7]:.15f}")
 
         # plot ---------------------------------------------------------------
-        
-        DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
+
         DataPlot.draw_rsd(model, rsd_data, log=False, ax=ax)
+        DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
         DataPlot.draw_2D_rsd(model, rsd_2D_data)
         
 

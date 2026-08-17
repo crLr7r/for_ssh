@@ -125,13 +125,18 @@ class Diamond(System):
     # corner state setting method
     def set_corner_states(self):
         self.corner_states = []
+        for x in self.state_list[self.basis_num - 3:self.basis_num + 3]:
+            E = self.evals_list[0][x]
+            if np.isclose(np.abs(E), 0):
+                self.corner_states.append(x)
+        '''
         prev_E = self.evals_list[0][0]
         for x in self.state_list[1:]:   # 첫 번째 값은 제외하고 시작
             E = self.evals_list[0][x]
             if prev_E < 0 and E > 0:
                 self.corner_states = [x - 1, x]
             prev_E = E
-
+        '''
     # y축 범위
     def get_E_bounds(self):
         self.is_E_bounded = True

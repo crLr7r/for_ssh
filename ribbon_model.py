@@ -18,7 +18,7 @@ class Ribbon(System):
         self.kmin, self.kmax = 0, 2 * np.pi / self.a
         self.klist = self.get_klist()
 
-    def H(self, k):
+    def H(self, k, k_y=0):
         delta, t, t_SO, lda, B, n = self.params
         a = self.a
 
