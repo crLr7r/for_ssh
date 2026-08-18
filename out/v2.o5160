@@ -1,0 +1,11 @@
+ 
+Job started at 2026. 08. 17. (월) 21:18:00 KST
+Traceback (most recent call last):
+  File "save_many_data.py", line 53, in <module>
+    model = Diamond(a, params)
+  File "/fhl-home/physcomp/for_ssh/diamond_model.py", line 15, in __init__
+    self.params[5] = int(params[5])
+TypeError: 'tuple' object does not support item assignment
+ 
+Job ended at 2026. 08. 17. (월) 21:18:00 KST
+ 

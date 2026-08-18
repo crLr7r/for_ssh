@@ -38,18 +38,18 @@ if __name__ == "__main__":
         a, Delta, t, t_SO, lda, B, n, m = 1, 0, 1, 0.1, 0.2, 1, 30, 31      # 디폴트 값
         if variation_param == 't_SO':
             for t_SO in np.arange(0, t, 0.1):
-                params = Delta, t, t_SO, lda, B, n, m
+                params = [Delta, t, t_SO, lda, B, n, m]
                 model = Diamond(a, params)
                 save_eigen_data(model)
         elif variation_param == 'lda':
             for lda in np.arange(0, t, 0.1):
-                params = Delta, t, t_SO, lda, B, n, m
+                params = [Delta, t, t_SO, lda, B, n, m]
                 model = Diamond(a, params)
                 save_eigen_data(model)
         elif variation_param == 'size':
             for n in np.arange(4, 50, 1):
                 m = n
-                params = Delta, t, t_SO, lda, B, n, m
+                params = [Delta, t, t_SO, lda, B, n, m]
                 model = Diamond(a, params)
                 save_eigen_data(model)
 
