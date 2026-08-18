@@ -49,7 +49,7 @@ class System(ABC):
         pass
 
     def load_eigen_data(self):
-        with np.load(self.filename) as data:
+        with np.load(f"data/{self.filename}") as data:
             self.evals_list = data["evals_list"]
             self.evecs_list = data["evecs_list"]
 

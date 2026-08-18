@@ -239,3 +239,26 @@ class DataPlot():
         ax.set_title(model.title)
         fig.savefig(f"images/{model.name}_rsd_2D({model.title}).png")
         plt.show()
+
+    @staticmethod
+    def draw_localization_length(model, xi_data,
+                             ax=None, title=None, fig_size=(6.4, 4.8), is_last=True):
+        
+        xlist, xi_list, xlabel = xi_data
+        model.set_title(title=title)
+        
+        if ax is None:
+            fig, ax = plt.subplots(figsize=fig_size)
+        else:
+            fig = ax.figure
+        ax.plot(xlist, xi_list, color="black")
+        
+        if is_last:
+            ax.set_title(model.title)
+            ax.grid(axis="y", alpha=0.25)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(r"$\xi$")
+            fig.tight_layout()
+            fig.savefig(f"images/{model.name}_xi - {xlabel}_({model.title}).png")
+            #plt.show()
+            plt.close()

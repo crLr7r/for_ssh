@@ -24,7 +24,7 @@ def save_eigen_data(model):
     evals_list, evecs_list = diagonalize(model)
 
     np.savez(
-        model.filename,
+        f"data/{model.filename}",
         evals_list=np.asarray(evals_list),
         evecs_list=np.asarray(evecs_list),
     )
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         #Diamond 1 0 1 0.1 0.2 1 30 31
         from diamond_model import Diamond
         a, Delta, t, t_SO, lda, B, n, m = 1, 0, 1, 0.1, 0.2, 1, 30, 31      # 디폴트 값
+        
         if variation_param == 't_SO':
             for t_SO in np.arange(0, t, 0.1):
                 params = [Delta, t, t_SO, lda, B, n, m]
