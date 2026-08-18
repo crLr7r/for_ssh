@@ -22,11 +22,15 @@ if __name__ == '__main__':
         }
 
         if variation_param == 'size':
-            variation_values = range(4, 50)
+            power = range(6, 1, -1)
+            variation_values = []
+            for p in power: variation_values.append(2 ** p)
         else:
             variation_values = np.arange(0, params[1], 0.1)
 
         xi_list = []
+        band_gap_list = []
+        split_list = []
 
         for value in variation_values:
             new_params = params.copy()
@@ -34,36 +38,40 @@ if __name__ == '__main__':
             if variation_param == 'size':
                 new_params[5:7] = [value, value]
             else:
-                new_params[param_idx[variation_param]] = value
+                new_params[param_idx[variation_param]] = round(value,1)
 
             model = Diamond(a, new_params)
             model.load_eigen_data()
             model.set_corner_states()
 
-            state = model.corner_states[1]
-            rsd_data = model.get_rsd_data([state], path=1)
+            states = model.corner_states
+            rsd_data = model.get_rsd_data([states[0]], path=1)
 
             x, density_list, *_ = rsd_data
-
+            '''
             x_fit = x[:len(x)//2]
             d_fit = density_list[0][:len(density_list[0])//2]
 
             A, B, xi, C = model.get_exp_fit(x_fit, d_fit, log=True)
             xi_list.append(xi + B)
-
+            
             fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(
                 x_fit,
                 A * np.exp(-np.abs(x_fit - B) / xi),
                 color='green'
             )
-            DataPlot.draw_rsd(model, rsd_data, ax=ax)
+            '''
+            band_gap_list.append(model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1])
+            split_list.append(model.evals_list[0][states[1]] - model.evals_list[0][states[0]])
+            #DataPlot.draw_rsd(model, rsd_data, ax=ax)
 
-        DataPlot.draw_localization_length(
-            model,
-            (variation_values, xi_list, variation_param)
-        )
+        #DataPlot.draw_any_data(model,(variation_values[1:-1], xi_list[1:-1], variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length")
 
+        DataPlot.draw_any_data(model,(variation_values, band_gap_list, variation_param, "Band Gap (E/t)", f"$\lambda$={params[3]}", [0, 0.367043]), title="Band Gap", log=True)
+
+        #DataPlot.draw_any_data(model, (variation_values[26:], split_list[26:], variation_param, "Splitting (E/t)", f"$\lambda$={params[3]}", None), title="Splitting")
+        
 '''
 
 if __name__ == '__main__':

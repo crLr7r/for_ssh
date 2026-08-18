@@ -240,25 +240,56 @@ class DataPlot():
         fig.savefig(f"images/{model.name}_rsd_2D({model.title}).png")
         plt.show()
 
+    #임의의 데이터 그리는 용도
     @staticmethod
-    def draw_localization_length(model, xi_data,
-                             ax=None, title=None, fig_size=(6.4, 4.8), is_last=True):
+    def draw_any_data(model, data,
+                             ax=None, title="data", fig_size=(6.4, 4.8), is_last=True, log=False):
         
-        xlist, xi_list, xlabel = xi_data
+        xlist, xi_list, xlabel, ylabel, label, extra_data = data
         model.set_title(title=title)
         
         if ax is None:
             fig, ax = plt.subplots(figsize=fig_size)
         else:
             fig = ax.figure
-        ax.plot(xlist, xi_list, color="black")
         
+        if extra_data is not None:
+            x0 = extra_data[0]
+            y0 = extra_data[1]
+            if log: y0 = np.log(np.maximum(y0, 1e-13))
+            ax.scatter(x0, y0, marker='x', s=50, color="red")
+            ax.annotate(
+                    f"ribbon band gap",
+                    xy=(x0, y0),  # 가리킬 점의 실제 좌표
+                    xytext=(x0 + 0.001, y0 + 0.1),  # 텍스트가 나타날 좌표
+                    arrowprops=dict(facecolor='red', edgecolor='red', shrink=0.05, width=0.5, headwidth=5),  # 화살표 옵션
+                    color="red"
+                )
+        
+        if log: 
+            xlist_inverse = 1/np.asarray(xlist)
+            xtick_labels = []
+            for x in xlist: xtick_labels.append(f"1/{round(x,0)}")
+            xi_list = np.log(np.maximum(xi_list, 1e-13))
+            ax.plot(xlist_inverse, xi_list, marker="o",markersize=3,linewidth=1, color="black", label=label)
+            ax.set_xticks(np.insert(xlist_inverse, 0, 0) if extra_data is not None else xlist_inverse)
+            ax.set_xticklabels(np.insert(xtick_labels,0, 0) if extra_data is not None else xtick_labels)
+        else:
+            ax.plot(xlist, xi_list, marker="o", markersize=3, linewidth=1, color="black", label=label)
+        
+        ax.legend()
+
         if is_last:
-            ax.set_title(model.title)
             ax.grid(axis="y", alpha=0.25)
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel(r"$\xi$")
+            if log: 
+                ax.set_title(f"{model.title}(log scale)")
+                ax.set_xlabel(f"{xlabel}(1/n)", size=15)
+                ax.set_ylabel(f"ln({ylabel})", size=15)
+            else: 
+                ax.set_title(model.title)
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(ylabel, size=15)
             fig.tight_layout()
-            fig.savefig(f"images/{model.name}_xi - {xlabel}_({model.title}).png")
-            #plt.show()
+            fig.savefig(f"images/{model.name}_{title} - {xlabel}.png")
+            plt.show()
             plt.close()

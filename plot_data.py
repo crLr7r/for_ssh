@@ -38,9 +38,9 @@ if __name__ == '__main__':
         print(f"xi(lda={model.params[3]})={xi}")
 
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(xlist,A * np.exp(-np.abs(xlist - B) / xi),color='green')
+        #ax.plot(xlist,A * np.exp(-np.abs(xlist - B) / xi),color='green')
 
-        print(f"band gap = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
+        print(f"band gap(n={n}, m={m}) = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
         print(f"E1={model.evals_list[0][states[0]]:.14f}, E2={model.evals_list[0][states[1]]:.14f}")
         model.get_total_density(states[0])
 
@@ -62,9 +62,9 @@ if __name__ == '__main__':
 
         # plot ---------------------------------------------------------------
 
-        DataPlot.draw_rsd(model, rsd_data, log=False, ax=ax)
+        #DataPlot.draw_rsd(model, rsd_data, log=False, ax=ax)
         DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
-        DataPlot.draw_2D_rsd(model, rsd_2D_data)
+        #DataPlot.draw_2D_rsd(model, rsd_2D_data)
         
 
     elif model_name == 'Ribbon':
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         for E in model.evals_list[model.KPOINTS // 2]:
             if np.isclose(E, 0, atol=0.25, rtol=0.1):
                 Elist.append(E)
-        print(f"ribbon band gap = {Elist[2] - Elist[1]:.6f}")
+        print(f"ribbon band gap(n={model.params[5]}) = {Elist[2] - Elist[1]:.6f}")
         '''
         model.set_xi_data(ver=1)    # 돌아가는 데 비교적 오래 걸리므로 필요할 때만 실행할 것
         xi_list, _, _ = model.xi_data

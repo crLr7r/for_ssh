@@ -14,7 +14,7 @@ class Diamond(System):
         super().__init__(a, params)
         self.params[5] = int(params[5])
         self.params[6] = int(params[6])
-        self.filename = f"diamond_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}_m={self.params[6]}.npz"
+        self.filename = f"diamond_delta={int(self.params[0])}_t={int(self.params[1])}_t_SO={self.params[2]}_lda={self.params[3]}_B={int(self.params[4])}_n={self.params[5]}_m={self.params[6]}.npz"
         self.basis_num = int(2 * self.params[5] * self.params[6])    # spin 고려 안 한 기저 개수
         self.state_list = np.asarray(range(self.basis_num * 2))  # state에 번호 붙인 리스트, spin 고려 o
         self.corner_states = None
@@ -124,11 +124,23 @@ class Diamond(System):
 
     # corner state setting method
     def set_corner_states(self):
-        self.corner_states = []
+        self.corner_states = [0, 1]
+        E_list = [np.inf, np.inf]
+        
         for x in self.state_list[self.basis_num - 3:self.basis_num + 3]:
             E = self.evals_list[0][x]
-            if np.isclose(np.abs(E), 0):
-                self.corner_states.append(x)
+            if np.abs(E) < E_list[0]:
+                E_list[1] = E_list[0]
+                E_list[0] = np.abs(E)
+                self.corner_states[1] = self.corner_states[0]
+                self.corner_states[0] = x
+            elif np.abs(E) < E_list[1]:
+                E_list[1] = np.abs(E)
+                self.corner_states[1] = x
+
+        self.corner_states.sort()
+        self.corner_states = np.asarray(self.corner_states)
+  
         '''
         prev_E = self.evals_list[0][0]
         for x in self.state_list[1:]:   # 첫 번째 값은 제외하고 시작

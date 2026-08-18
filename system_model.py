@@ -54,8 +54,8 @@ class System(ABC):
             self.evecs_list = data["evecs_list"]
 
     # 어떤 state에 대한 total density를 리턴하는 함수(1인지 확인용)
-    def get_total_density(self, state, do_print=True):
-        total_density = np.linalg.norm(self.evecs_list[0][state])
+    def get_total_density(self, state, k=0, do_print=True):
+        total_density = np.linalg.norm(self.evecs_list[k][state])
         if do_print: print(f"total_density = {total_density}")
         return total_density
 
