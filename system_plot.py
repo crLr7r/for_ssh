@@ -129,10 +129,10 @@ class DataPlot():
         is_increase = True
         prev_y = ylist[0]
         for i, y in enumerate(ylist[1::]):
-            if prev_y - y > 0.0001:  # 의미있는 감소를 했는데
+            if prev_y - y > 0.01:  # 의미있는 감소를 했는데
                 if is_increase: peak_idx_list.append(i)  # 이전까지 증가했을 때(i-1이 아니라 i임 주의)
                 is_increase = False
-            elif prev_y - y < -0.0001:  # 의미있는 증가만 증가로 취급
+            elif prev_y - y < -0.01:  # 의미있는 증가만 증가로 취급
                 is_increase = True
             else:
                 is_increase = False
@@ -165,11 +165,15 @@ class DataPlot():
                 ax.plot(xlist,density,marker="o",markersize=3,linestyle="none",label=f"state={states[i]}", color=color_list[i])
 
             peak_idxs = DataPlot.get_peak(density)
+            y_scale = np.max(density) - np.min(density)
+            y_mid = (np.max(density) + np.min(density)) / 2
+            print(y_scale)
             for j in peak_idxs:
+                y_weight = 1 if density[j] > y_mid else -1
                 ax.annotate(
                     f"({xlabels[j]},{density[j]:1.3f})",
                     xy=(xlist[j], density[j]),  # 가리킬 점의 실제 좌표
-                    xytext=(xlist[j] + 3, density[j] - 0.03),  # 텍스트가 나타날 좌표
+                    xytext=(xlist[j], density[j] - y_weight * y_scale/6),  # 텍스트가 나타날 좌표
                     arrowprops=dict(facecolor='black', shrink=0.05, width=0.5, headwidth=5)  # 화살표 옵션
                 )
 
@@ -243,7 +247,7 @@ class DataPlot():
     #임의의 데이터 그리는 용도
     @staticmethod
     def draw_any_data(model, data,
-                             ax=None, title="data", fig_size=(6.4, 4.8), is_last=True, log=False):
+                             ax=None, title="data", fig_size=(6.4, 4.8), is_last=True, log=False, x_inverse=False):
         
         xlist, xi_list, xlabel, ylabel, label, extra_data = data
         model.set_title(title=title)
@@ -256,7 +260,7 @@ class DataPlot():
         if extra_data is not None:
             x0 = extra_data[0]
             y0 = extra_data[1]
-            if log: y0 = np.log(np.maximum(y0, 1e-13))
+            if log: y0 = np.log2(np.maximum(y0, 1e-13))
             ax.scatter(x0, y0, marker='x', s=50, color="red")
             ax.annotate(
                     f"ribbon band gap",
@@ -265,15 +269,17 @@ class DataPlot():
                     arrowprops=dict(facecolor='red', edgecolor='red', shrink=0.05, width=0.5, headwidth=5),  # 화살표 옵션
                     color="red"
                 )
+        if log:
+            xi_list = np.log2(np.maximum(xi_list, 1e-13))
         
-        if log: 
+        if x_inverse: 
             xlist_inverse = 1/np.asarray(xlist)
             xtick_labels = []
             for x in xlist: xtick_labels.append(f"1/{round(x,0)}")
-            xi_list = np.log(np.maximum(xi_list, 1e-13))
             ax.plot(xlist_inverse, xi_list, marker="o",markersize=3,linewidth=1, color="black", label=label)
             ax.set_xticks(np.insert(xlist_inverse, 0, 0) if extra_data is not None else xlist_inverse)
             ax.set_xticklabels(np.insert(xtick_labels,0, 0) if extra_data is not None else xtick_labels)
+        
         else:
             ax.plot(xlist, xi_list, marker="o", markersize=3, linewidth=1, color="black", label=label)
         
@@ -281,13 +287,15 @@ class DataPlot():
 
         if is_last:
             ax.grid(axis="y", alpha=0.25)
+            if x_inverse:
+                ax.set_xlabel(f"{xlabel}(1/n)", size=15)
+            else:
+                ax.set_xlabel(xlabel, size=15)
             if log: 
                 ax.set_title(f"{model.title}(log scale)")
-                ax.set_xlabel(f"{xlabel}(1/n)", size=15)
-                ax.set_ylabel(f"ln({ylabel})", size=15)
+                ax.set_ylabel(fr"$log_2$({ylabel})", size=15)
             else: 
                 ax.set_title(model.title)
-                ax.set_xlabel(xlabel)
                 ax.set_ylabel(ylabel, size=15)
             fig.tight_layout()
             fig.savefig(f"images/{model.name}_{title} - {xlabel}.png")

@@ -12,9 +12,11 @@ class Diamond(System):
     # 인스턴스 함수 정의--------------------------------------------------------------------------------------------
     def __init__(self, a, params):
         super().__init__(a, params)
+        self.filename = f"diamond_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}_m={self.params[6]}.npz"
+
         self.params[5] = int(params[5])
         self.params[6] = int(params[6])
-        self.filename = f"diamond_delta={int(self.params[0])}_t={int(self.params[1])}_t_SO={self.params[2]}_lda={self.params[3]}_B={int(self.params[4])}_n={self.params[5]}_m={self.params[6]}.npz"
+        
         self.basis_num = int(2 * self.params[5] * self.params[6])    # spin 고려 안 한 기저 개수
         self.state_list = np.asarray(range(self.basis_num * 2))  # state에 번호 붙인 리스트, spin 고려 o
         self.corner_states = None
@@ -189,6 +191,11 @@ class Diamond(System):
             for i in range(m):
                 path_sites.append(n - 1 + i * 2 * n)
             path_name = "a-site edge"
+
+        elif path == 1.5: # 위쪽 빨간 테두리 반쪽
+            for i in range(n):
+                path_sites.append(i)
+            path_name = "a-site half edge"
 
         elif path == 2:  # 아래쪽 파란 테두리
             b = None

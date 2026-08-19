@@ -13,20 +13,23 @@ if __name__ == '__main__':
 
         # default
         a = 1
-        params = [0, 1, 0.1, 0.2, 1, 30, 31]
-        #         Δ  t  tSO  lda B  n   m
-
+        params = [0.0, 1.0, 0.1, 0.2, 1.0, 30.0, 31.0]
+        #         Δ    t    tSO  lda  B    n     m
+        n,m = int(params[5]), int(params[6])
         param_idx = {
             't_SO': 2,
             'lda': 3
         }
 
         if variation_param == 'size':
+            variation_values = [float(v) for v in range(30, 51)]
+            '''
             power = range(6, 1, -1)
             variation_values = []
-            for p in power: variation_values.append(2 ** p)
+            for p in power: variation_values.append(float(2 ** p))
+            '''
         else:
-            variation_values = np.arange(0, params[1], 0.1)
+            variation_values = np.arange(0, 0.6, 0.1)
 
         xi_list = []
         band_gap_list = []
@@ -41,36 +44,38 @@ if __name__ == '__main__':
                 new_params[param_idx[variation_param]] = round(value,1)
 
             model = Diamond(a, new_params)
+            
             model.load_eigen_data()
             model.set_corner_states()
 
             states = model.corner_states
-            rsd_data = model.get_rsd_data([states[0]], path=1)
+            rsd_data = model.get_rsd_data([states[0]], path=1.5)
 
             x, density_list, *_ = rsd_data
-            '''
+            
             x_fit = x[:len(x)//2]
             d_fit = density_list[0][:len(density_list[0])//2]
 
             A, B, xi, C = model.get_exp_fit(x_fit, d_fit, log=True)
-            xi_list.append(xi + B)
+            xi_list.append(xi)
             
             fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(
                 x_fit,
-                A * np.exp(-np.abs(x_fit - B) / xi),
+                np.log(A) - np.abs(x_fit - B) / xi,
                 color='green'
             )
-            '''
+            
             band_gap_list.append(model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1])
             split_list.append(model.evals_list[0][states[1]] - model.evals_list[0][states[0]])
-            #DataPlot.draw_rsd(model, rsd_data, ax=ax)
+            #DataPlot.draw_rsd(model, rsd_data, ax=ax, log=True)
+        
+        if variation_param == 'size': variation_values = [int(value) for value in variation_values]
+        DataPlot.draw_any_data(model,(variation_values, xi_list, variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length", log=True)
 
-        #DataPlot.draw_any_data(model,(variation_values[1:-1], xi_list[1:-1], variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length")
+        #DataPlot.draw_any_data(model,(variation_values, band_gap_list, variation_param, "Band Gap (E/t)", f"$\lambda$={params[3]}", [0, 0.367043]), title="Band Gap", log=True, x_inverse=True)
 
-        DataPlot.draw_any_data(model,(variation_values, band_gap_list, variation_param, "Band Gap (E/t)", f"$\lambda$={params[3]}", [0, 0.367043]), title="Band Gap", log=True)
-
-        #DataPlot.draw_any_data(model, (variation_values[26:], split_list[26:], variation_param, "Splitting (E/t)", f"$\lambda$={params[3]}", None), title="Splitting")
+        #DataPlot.draw_any_data(model, (variation_values, split_list, variation_param, "Splitting (E/t)", f"$\lambda$={params[3]}", None), title="Splitting", log=True, x_inverse=True)
         
 '''
 

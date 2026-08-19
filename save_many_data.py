@@ -35,44 +35,62 @@ if __name__ == "__main__":
     if model_name == 'Diamond':
         #Diamond 1 0 1 0.1 0.2 1 30 31
         from diamond_model import Diamond
-        a, Delta, t, t_SO, lda, B, n, m = 1, 0, 1, 0.1, 0.2, 1, 30, 31      # 디폴트 값
-        
-        if variation_param == 't_SO':
-            for t_SO in np.arange(0, t, 0.1):
-                params = [Delta, t, t_SO, lda, B, n, m]
-                model = Diamond(a, params)
-                save_eigen_data(model)
-        elif variation_param == 'lda':
-            for lda in np.arange(0, t, 0.1):
-                params = [Delta, t, t_SO, lda, B, n, m]
-                model = Diamond(a, params)
-                save_eigen_data(model)
-        elif variation_param == 'size':
-            for n in np.arange(4, 50, 1):
-                m = n
-                params = [Delta, t, t_SO, lda, B, n, m]
-                model = Diamond(a, params)
-                save_eigen_data(model)
+        # default
+        a = 1
+        params = np.asarray([0, 1, 0.1, 0.2, 1, 30, 31])
+        #         Δ  t  tSO  lda B  n   m
+
+        param_idx = {
+            't_SO': 2,
+            'lda': 3
+        }
+
+        if variation_param == 'size':
+            power = range(6, 1, -1)
+            variation_values = []
+            for p in power: variation_values.append(2 ** p)
+        else:
+            variation_values = np.arange(0, params[1], 0.1)
+
+        for value in variation_values:
+            new_params = params.copy()
+
+            if variation_param == 'size':
+                new_params[5:7] = [value, value]
+            else:
+                new_params[param_idx[variation_param]] = round(value,1)
+
+            model = Diamond(a, new_params)
+            save_eigen_data(model)
 
     if model_name == 'Ribbon':
         #Ribbon 1 0 1 0.1 0.2 1 55
         from ribbon_model import Ribbon
-        a, Delta, t, t_SO, lda, B, n = 1, 0, 1, 0.1, 0.2, 1, 55  # 디폴트 값
-        if variation_param == 't_SO':
-            for t_SO in np.arange(0, t, 0.1):
-                params = Delta, t, t_SO, lda, B, n
-                model = Diamond(a, params)
-                save_eigen_data(model)
-        elif variation_param == 'lda':
-            for lda in np.arange(0, t, 0.1):
-                params = Delta, t, t_SO, lda, B, n
-                model = Diamond(a, params)
-                save_eigen_data(model)
-        elif variation_param == 'size':
-            for n in np.arange(0, 55, 1):
-                params = Delta, t, t_SO, lda, B, n
-                model = Diamond(a, params)
-                save_eigen_data(model)
+        # default
+        a = 1
+        params = np.asarray([0, 1, 0.1, 0.2, 1, 55])
+        #         Δ  t  tSO  lda B  n   m
+
+        param_idx = {
+            't_SO': 2,
+            'lda': 3
+        }
+
+        if variation_param == 'size':
+            variation_values = range(5, 55, 5)
+        else:
+            variation_values = np.arange(0, params[1], 0.1)
+
+        for value in variation_values:
+            new_params = params.copy()
+
+            if variation_param == 'size':
+                new_params[5:7] = [value, value]
+            else:
+                new_params[param_idx[variation_param]] = round(value,1)
+
+            model = Diamond(a, new_params)    
+            save_eigen_data(model)
 
     if model_name == 'Bulk':
         #Bulk 1 0 1 0.1
