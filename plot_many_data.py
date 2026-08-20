@@ -28,6 +28,9 @@ if __name__ == '__main__':
             variation_values = []
             for p in power: variation_values.append(float(2 ** p))
             '''
+        elif variation_param == 'lda':
+            power = range(-4, 1)
+            variation_values = [0.1*(2**p) for p in power]
         else:
             variation_values = np.arange(0, 0.6, 0.1)
 
@@ -68,7 +71,7 @@ if __name__ == '__main__':
             
             band_gap_list.append(model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1])
             split_list.append(model.evals_list[0][states[1]] - model.evals_list[0][states[0]])
-            #DataPlot.draw_rsd(model, rsd_data, ax=ax, log=True)
+            DataPlot.draw_rsd(model, rsd_data, ax=ax, log=True)
         
         if variation_param == 'size': variation_values = [int(value) for value in variation_values]
         DataPlot.draw_any_data(model,(variation_values, xi_list, variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length", log=True)

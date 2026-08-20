@@ -49,6 +49,9 @@ if __name__ == "__main__":
             power = range(6, 1, -1)
             variation_values = []
             for p in power: variation_values.append(2 ** p)
+        elif variation_param == 'lda':
+            power = range(-4, 1)
+            variation_values = [0.1*(2**p) for p in power]
         else:
             variation_values = np.arange(0, params[1], 0.1)
 
