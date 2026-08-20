@@ -306,7 +306,7 @@ class Ribbon(System):
                 x = x_b
                 density = density_b
 
-            _, _, xi, _ = self.get_exp_fit(x, density, log=log)
+            _, _, xi, _ = self.get_exp_dissolve_fit(x, density, log=log)
             xi_list.append(xi)
 
         self.xi_data = xi_list, "xi", 0.5

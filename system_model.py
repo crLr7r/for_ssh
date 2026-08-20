@@ -71,12 +71,72 @@ class System(ABC):
     def get_2D_rsd_data(self, idx_list, spin=None):
         pass
 
-     # 어떤 xlist, dlist 데이터에 대해 지수 감쇠 모델을 피팅하는 함수
-    def get_exp_fit(self, xlist, dlist, log=True):  # xi_0: 초기 추정값
+    # 주어진 y값들에 대해 극대 인덱스 리스트 반환
+    @staticmethod
+    def get_peak(ylist):
+        ylist_len = len(ylist)
+        yscale = max(ylist) - min(ylist)
+        
+        def idx(i):
+            if i < 0: return 0
+            elif i >= ylist_len: return ylist_len - 1
+            else: return i
+        
+        def is_decrease(i, j):
+            i, j = idx(i), idx(j)
+            if i == j: return 1     # j가 실제 인덱스가 아닐 때
+            if ylist[i] - ylist[j] > yscale / 50: return 1 # 의미 있는 감소를 했을 때
+            elif ylist[i] > ylist[j]: return 0  # 작지만 감소는 했을 때
+            else: return -1 # 감소도 안 했을 때
+
+        def is_peak(i): # 앞 뒤 3개를 보고 peak인지 아닌지 판단한다
+            is_left_decrease, is_right_decrease = False, False
+            
+            m1, m2, m3 = is_decrease(i, i-1), is_decrease(i, i-2), is_decrease(i, i-3)
+            p1, p2, p3 = is_decrease(i, i+1), is_decrease(i, i+2), is_decrease(i, i+3)
+
+            if m1 == 1: is_left_decrease = True
+            elif m1 == 0:
+                if m2 == 1: is_left_decrease = True
+                elif m2 == 0:
+                    if m3 == 1: is_left_decrease = True
+
+            if p1 == 1: is_right_decrease = True
+            elif p1 == 0:
+                if p2 == 1: is_right_decrease = True
+                elif p2 == 0:
+                    if p3 == 1: is_right_decrease = True
+
+            return is_left_decrease and is_right_decrease
+        
+        peak_idx_list = []
+        
+        for i in range(ylist_len):
+            if is_peak(i): peak_idx_list.append(i)
+
+        '''
+        is_increase = True
+        prev_y = ylist[0]
+        for i, y in enumerate(ylist[1::]):
+            if prev_y - y > 0.001:  # 의미있는 감소를 했는데
+                if is_increase: peak_idx_list.append(i)  # 이전까지 증가했을 때(i-1이 아니라 i임 주의)
+                is_increase = False
+            elif prev_y - y < -0.001:  # 의미있는 증가만 증가로 취급
+                is_increase = True
+            else:
+                is_increase = False
+            prev_y = y
+        if is_increase: peak_idx_list.append(len(ylist) - 1)  # 마지막까지 증가했으면 마지막 인덱스도 추가
+        '''
+        return peak_idx_list
+
+    @staticmethod
+    # 어떤 xlist, dlist 데이터에 대해 지수 감쇠 모델을 피팅하는 함수
+    def get_exp_dissolve_fit(xlist, dlist, log=True, return_log=True):  # xi_0: 초기 추정값
         x = np.asarray(xlist)
         y = np.asarray(dlist)
 
-        if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
+        #if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
 
         # 피팅할 함수: 지수 감쇠 함수
         def exp_dissolve(x, A, B, xi, C):
@@ -86,24 +146,34 @@ class System(ABC):
         def exp_log_dissolve(x, A, B, xi, C):
             return np.log(A) - np.abs(x - B) / xi
 
+        #print(x)
         # 초기 추정값
         C0 = np.min(y)
         B0 = x[np.argmax(y)]
-        xi0 = (x[-1] - x[0]) / 5
+        xi0 = np.abs(x[-1] - x[0]) / 5
         A0 = np.max(y) - C0
-
+        #print(f"초기값: {A0}, {xi0}, {B0}, {C0}")
+        
         # 로그 스케일일 경우
         fit_func = exp_dissolve
         if log:
             y = np.log(np.maximum(y, 1e-13))
             fit_func = exp_log_dissolve
+            '''
             for idx in range(len(y)):
                 if idx == 0: continue
                 if np.isclose(y[idx], y[idx - 1], rtol=1e-8, atol=1e-10):
                     y = y[:idx]
                     x = x[:idx]
                     break
-
+            '''
+            '''
+            peak_idx_list = System.get_peak(y)
+            peak_idx = peak_idx_list[0]
+            
+            y = y[peak_idx:]
+            x = x[peak_idx:]
+            '''
         # 피팅
         parameters, _ = curve_fit(
             fit_func,
@@ -113,6 +183,69 @@ class System(ABC):
             bounds=([0, 0, 1e-10, 0], [np.inf, np.inf, np.inf, np.inf]),
             maxfev=100000
         )
+        
+        if return_log: fit_func = exp_log_dissolve
+        else: fit_func = exp_dissolve
+        x_fit = x
+        y_fit = fit_func(x_fit, *parameters)
+        
+        return parameters, x_fit, y_fit
 
-        return parameters
+    @staticmethod
+    def get_exp_fit(xlist, dlist, log=True, return_log=True):  # xi_0: 초기 추정값
+        x = np.asarray(xlist)
+        y = np.asarray(dlist)
 
+        #if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
+
+        # 피팅할 함수: 지수 함수
+        def exp_dissolve(x, A, xi, C):
+            return A * 2.668 ** (x / xi) + C
+
+        # 피팅할 함수2: 세미로그 함수
+        def exp_log_dissolve(x, A, xi, C):
+            return np.log(A)/np.log(2.668) + x / xi
+
+        #print(x)
+        # 초기 추정값
+        C0 = np.min(y)
+        xi0 = np.abs(x[-1] - x[0]) / 5
+        A0 = np.max(y) - C0
+        #print(f"초기값: {A0}, {xi0}, {B0}, {C0}")
+        
+        # 로그 스케일일 경우
+        fit_func = exp_dissolve
+        if log:
+            y = np.log(np.maximum(y, 1e-13))
+            fit_func = exp_log_dissolve
+            '''
+            for idx in range(len(y)):
+                if idx == 0: continue
+                if np.isclose(y[idx], y[idx - 1], rtol=1e-8, atol=1e-10):
+                    y = y[:idx]
+                    x = x[:idx]
+                    break
+            '''
+            '''
+            peak_idx_list = System.get_peak(y)
+            peak_idx = peak_idx_list[0]
+            
+            y = y[peak_idx:]
+            x = x[peak_idx:]
+            '''
+        # 피팅
+        parameters, _ = curve_fit(
+            fit_func,
+            x,
+            y,
+            p0=[A0, xi0, C0],  # A, B, xi, C의 초기 추정값
+            bounds=([0, 1e-10, 0], [np.inf, np.inf, np.inf]),
+            maxfev=100000
+        )
+        
+        if return_log: fit_func = exp_log_dissolve
+        else: fit_func = exp_dissolve
+        x_fit = x
+        y_fit = fit_func(x_fit, *parameters)
+        
+        return parameters, x_fit, y_fit

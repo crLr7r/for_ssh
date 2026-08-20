@@ -38,7 +38,7 @@ if __name__ == "__main__":
         # default
         a = 1
         params = np.asarray([0, 1, 0.1, 0.2, 1, 30, 31])
-        #         Δ  t  tSO  lda B  n   m
+        #                    Δ  t  tSO  lda B  n   m
 
         param_idx = {
             't_SO': 2,
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             if variation_param == 'size':
                 new_params[5:7] = [value, value]
             else:
-                new_params[param_idx[variation_param]] = round(value,1)
+                new_params[param_idx[variation_param]] = value
 
             model = Diamond(a, new_params)
             save_eigen_data(model)

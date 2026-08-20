@@ -122,25 +122,6 @@ class DataPlot():
         else:
             return min(candidates, key=lambda x: x[0])[1]
 
-    # 주어진 y값들에 대해 극대 인덱스 리스트 반환
-    @staticmethod
-    def get_peak(ylist):
-        peak_idx_list = []
-        is_increase = True
-        prev_y = ylist[0]
-        for i, y in enumerate(ylist[1::]):
-            if prev_y - y > 0.01:  # 의미있는 감소를 했는데
-                if is_increase: peak_idx_list.append(i)  # 이전까지 증가했을 때(i-1이 아니라 i임 주의)
-                is_increase = False
-            elif prev_y - y < -0.01:  # 의미있는 증가만 증가로 취급
-                is_increase = True
-            else:
-                is_increase = False
-            prev_y = y
-        if is_increase: peak_idx_list.append(len(ylist) - 1)  # 마지막까지 증가했으면 마지막 인덱스도 추가
-
-        return peak_idx_list
-
     @staticmethod
     def draw_rsd(model, rsd_data,
                  ax=None, title=None,
@@ -164,7 +145,8 @@ class DataPlot():
             else:
                 ax.plot(xlist,density,marker="o",markersize=3,linestyle="none",label=f"state={states[i]}", color=color_list[i])
 
-            peak_idxs = DataPlot.get_peak(density)
+            peak_idxs = model.get_peak(density)
+            #print("peak_idxs=",peak_idxs)
             y_scale = np.max(density) - np.min(density)
             y_mid = (np.max(density) + np.min(density)) / 2
             print(y_scale)
@@ -270,7 +252,7 @@ class DataPlot():
                     color="red"
                 )
         if log:
-            xi_list = np.log2(np.maximum(xi_list, 1e-13))
+            xi_list = np.log(np.maximum(xi_list, 1e-13))/np.log(2.668)
         
         if x_inverse: 
             xlist_inverse = 1/np.asarray(xlist)
@@ -279,8 +261,9 @@ class DataPlot():
             ax.plot(xlist_inverse, xi_list, marker="o",markersize=3,linewidth=1, color="black", label=label)
             ax.set_xticks(np.insert(xlist_inverse, 0, 0) if extra_data is not None else xlist_inverse)
             ax.set_xticklabels(np.insert(xtick_labels,0, 0) if extra_data is not None else xtick_labels)
-        
         else:
+            ax.set_xticks(xlist)
+            ax.set_xticklabels(xlist)
             ax.plot(xlist, xi_list, marker="o", markersize=3, linewidth=1, color="black", label=label)
         
         ax.legend()
@@ -293,11 +276,13 @@ class DataPlot():
                 ax.set_xlabel(xlabel, size=15)
             if log: 
                 ax.set_title(f"{model.title}(log scale)")
-                ax.set_ylabel(fr"$log_2$({ylabel})", size=15)
+                ax.set_ylabel(fr"$log_(2.668)$({ylabel})", size=15)
             else: 
                 ax.set_title(model.title)
                 ax.set_ylabel(ylabel, size=15)
+            
             fig.tight_layout()
-            fig.savefig(f"images/{model.name}_{title} - {xlabel}.png")
+            if log: fig.savefig(f"images/{model.name}_{title}(log) - {xlabel}.png")
+            else: fig.savefig(f"images/{model.name}_{title} - {xlabel}.png")
             plt.show()
             plt.close()

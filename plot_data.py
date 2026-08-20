@@ -34,7 +34,7 @@ if __name__ == '__main__':
         xlist, dlist, _, _, _, _, _ = rsd_data
         xlist = xlist[:len(xlist)//2]
         dlist = dlist[0][:len(dlist[0])//2]
-        A,B,xi,C = model.get_exp_fit(xlist, dlist, log=True)
+        A,B,xi,C = model.get_exp_dissolve_fit(xlist, dlist, log=True)
         print(f"xi(lda={model.params[3]})={xi}")
 
         fig, ax = plt.subplots(figsize=(10, 5))
