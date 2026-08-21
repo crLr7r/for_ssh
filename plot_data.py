@@ -34,7 +34,8 @@ if __name__ == '__main__':
         xlist, dlist, _, _, _, _, _ = rsd_data
         xlist = xlist[:len(xlist)//2]
         dlist = dlist[0][:len(dlist[0])//2]
-        A,B,xi,C = model.get_exp_dissolve_fit(xlist, dlist, log=True)
+        parameters, _, _ = model.get_exp_dissolve_fit(xlist, dlist, log=True)
+        A,B,xi,C=parameters
         print(f"xi(lda={model.params[3]})={xi}")
 
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -50,8 +51,8 @@ if __name__ == '__main__':
         e_list = []
         for i, s in enumerate(e):
             site = [2*model.s_comp(*s), 2*model.s_comp(*s)+1]
-            elt = [model.evecs_list[0][states[1]][site[0]], model.evecs_list[0][states[1]][site[1]]]
-            #print(f"e{i+1}' = ({elt[0]:.10f}, {elt[1]:.10f})")
+            elt = [model.evecs_list[0][states[0]][site[0]], model.evecs_list[0][states[0]][site[1]]]
+            if i == 3 or i == 6: print(f"e{i+1} = ({elt[0]:.4f}, {elt[1]:.4f})")
             density = np.abs(elt[0])**2 + np.abs(elt[1])**2
             density_list.append(density)
             for elt_i in elt: e_list.append(elt_i)

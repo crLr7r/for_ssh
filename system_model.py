@@ -90,22 +90,26 @@ class System(ABC):
             else: return -1 # 감소도 안 했을 때
 
         def is_peak(i): # 앞 뒤 3개를 보고 peak인지 아닌지 판단한다
-            is_left_decrease, is_right_decrease = False, False
             
             m1, m2, m3 = is_decrease(i, i-1), is_decrease(i, i-2), is_decrease(i, i-3)
             p1, p2, p3 = is_decrease(i, i+1), is_decrease(i, i+2), is_decrease(i, i+3)
 
+            is_left_decrease = 4*m1 + 2*m2 + m3 > 0
+            '''
             if m1 == 1: is_left_decrease = True
             elif m1 == 0:
                 if m2 == 1: is_left_decrease = True
                 elif m2 == 0:
                     if m3 == 1: is_left_decrease = True
-
+            '''
+            is_right_decrease = 4*p1 + 2*p2 + p3 > 0
+            '''
             if p1 == 1: is_right_decrease = True
             elif p1 == 0:
                 if p2 == 1: is_right_decrease = True
                 elif p2 == 0:
                     if p3 == 1: is_right_decrease = True
+            '''
 
             return is_left_decrease and is_right_decrease
         

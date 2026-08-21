@@ -29,8 +29,7 @@ if __name__ == '__main__':
             for p in power: variation_values.append(float(2 ** p))
             '''
         elif variation_param == 'lda':
-            power = range(-4, 1)
-            variation_values = [0.1*(2**p) for p in power]
+            variation_values = [0.2]
         else:
             variation_values = np.arange(0, 0.6, 0.1)
 
@@ -62,17 +61,17 @@ if __name__ == '__main__':
             parameters, x_fit, d_fit = model.get_exp_dissolve_fit(x_fit, d_fit, log=True, return_log=True)
             A, B, xi, C = parameters
             xi_list.append(xi)
-            '''
+            
             fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(x_fit,d_fit,color='green')
-            '''
+            
             band_gap_list.append(model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1])
             split_list.append(model.evals_list[0][states[1]] - model.evals_list[0][states[0]])
-            #DataPlot.draw_rsd(model, rsd_data, ax=ax, log=True)
+            DataPlot.draw_rsd(model, rsd_data, ax=ax, log=True)
         
         if variation_param == 'size': variation_values = [int(value) for value in variation_values]
         print("xi list = ", xi_list)
-        #DataPlot.draw_any_data(model,(variation_values, xi_list, variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length", log=False)
+        DataPlot.draw_any_data(model,(variation_values, xi_list, variation_param, r"$\xi$", f"n={n}, m={m}", None), title="Localization length", log=False)
 
         #DataPlot.draw_any_data(model,(variation_values, band_gap_list, variation_param, "Band Gap (E/t)", fr"$\lambda$={params[3]}", [0, 0.367043]), title="Band Gap", log=True, x_inverse=True)
 
