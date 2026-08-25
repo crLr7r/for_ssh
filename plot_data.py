@@ -7,7 +7,7 @@ import sys
 if __name__ == '__main__':
     model_name, a, params = (sys.argv[1],
                                  float(sys.argv[2]),
-                                 [float(x) for x in sys.argv[3:]])
+                                 [float(x) for x in sys.argv[3:]])      # Diamond 1 0 1 0.1 0.2 1 30 30 <<이런식으로 입력하면 됨
 
     if model_name == 'Diamond':
         # Diamond 1 0 1 0.1 0.2 1 30 31 (a Delta t t_SO lda B n m)
@@ -29,30 +29,53 @@ if __name__ == '__main__':
         '''
         band_data = model.get_band_data()
         rsd_data = model.get_rsd_data([states[1]], path=1)
-        rsd_2D_data = model.get_2D_rsd_data([states[0]])
+        rsd_2D_data = model.get_2D_rsd_data([states[1]])
         
         xlist, dlist, _, _, _, _, _ = rsd_data
         xlist = xlist[:len(xlist)//2]
         dlist = dlist[0][:len(dlist[0])//2]
-        parameters, _, _ = model.get_exp_dissolve_fit(xlist, dlist, log=True)
+        parameters, param_erros, _, _ = model.get_exp_dissolve_fit(xlist, dlist, log=True)
         A,B,xi,C=parameters
-        print(f"xi(lda={model.params[3]})={xi}")
+        
+        t_SO, lda = model.params[2], model.params[3]
+        print(f"t_SO={t_SO}, lda={lda}")
+        print(f"numerical xi={xi}")
+        k = lda/t_SO
+        alpha = -(k/2) + np.sqrt((k/2) ** 2 + 1)
+        analytic_xi = -1/(2*np.log(alpha))
+        print(f"analytic xi={analytic_xi}")
 
         fig, ax = plt.subplots(figsize=(10, 5))
         #ax.plot(xlist,A * np.exp(-np.abs(xlist - B) / xi),color='green')
 
-        print(f"band gap(n={n}, m={m}) = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
-        print(f"E1={model.evals_list[0][states[0]]:.14f}, E2={model.evals_list[0][states[1]]:.14f}")
-        model.get_total_density(states[0])
+        #print(f"band gap(n={n}, m={m}) = {model.evals_list[0][states[1] + 1] - model.evals_list[0][states[0] - 1]:.14f}")
+        #print(f"E1={model.evals_list[0][states[0]]:.14f}, E2={model.evals_list[0][states[1]]:.14f}")
+        model.get_total_density(states[0], do_print=False)
 
+        state_num = states[1] - 1000
         extra = [(1, 1, 1), (0, 1, 1)]
-        e = [(1, 0, 3), (1, 0, 2), (1, 0, 1), (0, 0, 1), (1, 0, 0), (0, 0, 0), (1, 1, 0), (0, 1, 0), (0, 2, 0), (0, 3, 0)]
+        a = [(0,0,0), (0,1,0), (0,2,0)]
+        b = [(1,0,0), (1,0,1), (1,0,2)]
+        a_right = [(0,n-1,m-1), (0,n-1,m-2), (0,n-1,m-3)]
+        b_right = [(1,n-1,m-1), (1,n-2,m-1), (1,n-3,m-1)]
+        #e = [(1, 0, 3), (1, 0, 2), (1, 0, 1), (0, 0, 1), (1, 0, 0), (0, 0, 0), (1, 1, 0), (0, 1, 0), (0, 2, 0), (0, 3, 0)]
         density_list = []
         e_list = []
-        for i, s in enumerate(e):
+        
+        #print("corner state #",state_num, "\n")
+        print("Bulk state #",state_num, "\n")
+        for i, s in enumerate(a):
             site = [2*model.s_comp(*s), 2*model.s_comp(*s)+1]
-            elt = [model.evecs_list[0][states[0]][site[0]], model.evecs_list[0][states[0]][site[1]]]
-            if i == 3 or i == 6: print(f"e{i+1} = ({elt[0]:.4f}, {elt[1]:.4f})")
+            elt = [model.evecs_list[0][state_num][site[0]], model.evecs_list[0][state_num][site[1]]]
+            print(f"a{i+1} = ({elt[0]:.10f}, {elt[1]:.10f})")
+            density = np.abs(elt[0])**2 + np.abs(elt[1])**2
+            density_list.append(density)
+            for elt_i in elt: e_list.append(elt_i)
+        print()
+        for i, s in enumerate(b):
+            site = [2*model.s_comp(*s), 2*model.s_comp(*s)+1]
+            elt = [model.evecs_list[0][state_num][site[0]], model.evecs_list[0][state_num][site[1]]]
+            print(f"b{i+1} = ({elt[0]:.10f}, {elt[1]:.10f})")
             density = np.abs(elt[0])**2 + np.abs(elt[1])**2
             density_list.append(density)
             for elt_i in elt: e_list.append(elt_i)
@@ -60,12 +83,12 @@ if __name__ == '__main__':
         #for e_i in e_list: print(f"{e_i:.10f}", end=", ")
         #print(f"corner site density={density_list[5]:.4f}")
         #print(f"decay(lda={model.params[3]})={density_list[5] - density_list[7]:.15f}")
-
+        
         # plot ---------------------------------------------------------------
 
         #DataPlot.draw_rsd(model, rsd_data, log=False, ax=ax)
-        DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
-        #DataPlot.draw_2D_rsd(model, rsd_2D_data)
+        #DataPlot.draw_band(model, band_data, is_E_bounded=True, is_x_bounded=True, is_kspace=is_kspace)
+        DataPlot.draw_2D_rsd(model, rsd_2D_data, title=r"Density($\Delta$=0, $t_{SO}$=0.1, $\lambda$=0.2, n=30, m=30)")
         
 
     elif model_name == 'Ribbon':

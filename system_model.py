@@ -49,7 +49,7 @@ class System(ABC):
         pass
 
     def load_eigen_data(self):
-        with np.load(f"data/{self.filename}") as data:
+        with np.load(f"data/{self.filename}.npz") as data:
             self.evals_list = data["evals_list"]
             self.evecs_list = data["evecs_list"]
 
@@ -135,20 +135,21 @@ class System(ABC):
         return peak_idx_list
 
     @staticmethod
+    # 피팅할 함수: 지수 감쇠 함수
+    def exp_dissolve(x, A, B, xi, C):
+        return A * np.exp(-np.abs(x - B) / xi) + C
+    @staticmethod
+    # 피팅할 함수2: 세미로그 함수
+    def exp_log_dissolve(x, A, B, xi, C):
+        return np.log(A) - np.abs(x - B) / xi
+
+    @staticmethod
     # 어떤 xlist, dlist 데이터에 대해 지수 감쇠 모델을 피팅하는 함수
     def get_exp_dissolve_fit(xlist, dlist, log=True, return_log=True):  # xi_0: 초기 추정값
         x = np.asarray(xlist)
         y = np.asarray(dlist)
 
         #if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
-
-        # 피팅할 함수: 지수 감쇠 함수
-        def exp_dissolve(x, A, B, xi, C):
-            return A * np.exp(-np.abs(x - B) / xi) + C
-
-        # 피팅할 함수2: 세미로그 함수
-        def exp_log_dissolve(x, A, B, xi, C):
-            return np.log(A) - np.abs(x - B) / xi
 
         #print(x)
         # 초기 추정값
@@ -159,10 +160,10 @@ class System(ABC):
         #print(f"초기값: {A0}, {xi0}, {B0}, {C0}")
         
         # 로그 스케일일 경우
-        fit_func = exp_dissolve
+        fit_func = System.exp_dissolve
         if log:
             y = np.log(np.maximum(y, 1e-13))
-            fit_func = exp_log_dissolve
+            fit_func = System.exp_log_dissolve
             '''
             for idx in range(len(y)):
                 if idx == 0: continue
@@ -171,15 +172,17 @@ class System(ABC):
                     x = x[:idx]
                     break
             '''
-            '''
-            peak_idx_list = System.get_peak(y)
-            peak_idx = peak_idx_list[0]
             
-            y = y[peak_idx:]
-            x = x[peak_idx:]
-            '''
+            peak_idx_list = System.get_peak(y)
+
+            if len(peak_idx_list) > 0:
+                peak_idx = peak_idx_list[0]
+            
+                y = y[peak_idx + 2:]
+                x = x[peak_idx + 2:]
+            
         # 피팅
-        parameters, _ = curve_fit(
+        parameters, covariance = curve_fit(
             fit_func,
             x,
             y,
@@ -187,13 +190,25 @@ class System(ABC):
             bounds=([0, 0, 1e-10, 0], [np.inf, np.inf, np.inf, np.inf]),
             maxfev=100000
         )
-        
-        if return_log: fit_func = exp_log_dissolve
-        else: fit_func = exp_dissolve
+        if log: parameters[3] = 0
+        if return_log: fit_func = System.exp_log_dissolve
+        else: fit_func = System.exp_dissolve
         x_fit = x
         y_fit = fit_func(x_fit, *parameters)
+
+        parameter_errors = np.sqrt(np.diag(covariance))
         
-        return parameters, x_fit, y_fit
+        return parameters, parameter_errors, x_fit, y_fit
+
+    @staticmethod
+    # 피팅할 함수: 지수 함수
+    def exp(x, A, xi, C):
+        return A * np.exp(x / xi) + C
+
+    @staticmethod
+    # 피팅할 함수2: 세미로그 함수
+    def exp_log(x, A, xi, C):
+        return np.log(A) + x / xi
 
     @staticmethod
     def get_exp_fit(xlist, dlist, log=True, return_log=True):  # xi_0: 초기 추정값
@@ -201,15 +216,6 @@ class System(ABC):
         y = np.asarray(dlist)
 
         #if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
-
-        # 피팅할 함수: 지수 함수
-        def exp_dissolve(x, A, xi, C):
-            return A * 2.668 ** (x / xi) + C
-
-        # 피팅할 함수2: 세미로그 함수
-        def exp_log_dissolve(x, A, xi, C):
-            return np.log(A)/np.log(2.668) + x / xi
-
         #print(x)
         # 초기 추정값
         C0 = np.min(y)
@@ -218,10 +224,10 @@ class System(ABC):
         #print(f"초기값: {A0}, {xi0}, {B0}, {C0}")
         
         # 로그 스케일일 경우
-        fit_func = exp_dissolve
+        fit_func = System.exp
         if log:
             y = np.log(np.maximum(y, 1e-13))
-            fit_func = exp_log_dissolve
+            fit_func = System.exp_log
             '''
             for idx in range(len(y)):
                 if idx == 0: continue
@@ -234,22 +240,81 @@ class System(ABC):
             peak_idx_list = System.get_peak(y)
             peak_idx = peak_idx_list[0]
             
-            y = y[peak_idx:]
-            x = x[peak_idx:]
+            y = y[peak_idx + 2:]
+            x = x[peak_idx + 2:]
             '''
         # 피팅
-        parameters, _ = curve_fit(
+        parameters, covariance = curve_fit(
             fit_func,
             x,
             y,
-            p0=[A0, xi0, C0],  # A, B, xi, C의 초기 추정값
-            bounds=([0, 1e-10, 0], [np.inf, np.inf, np.inf]),
+            p0=[A0, xi0, C0],  # 초기 추정값
             maxfev=100000
         )
+
+      
+        parameter_errors = np.sqrt(np.diag(covariance))
         
-        if return_log: fit_func = exp_log_dissolve
-        else: fit_func = exp_dissolve
+        if log: parameters[2] = 0   # C=0
+        if return_log: fit_func = System.exp_log
+        else: fit_func = System.exp
         x_fit = x
         y_fit = fit_func(x_fit, *parameters)
         
-        return parameters, x_fit, y_fit
+        return parameters, parameter_errors, x_fit, y_fit
+
+    # 피팅할 함수: power 함수
+    @staticmethod
+    def power(x, A, alpha):
+        return A * (x ** alpha)
+
+    @staticmethod
+    def power_log(x, A, alpha):
+        return np.log2(A) + alpha * np.log2(x)
+
+    @staticmethod
+    def get_power_fit(xlist, dlist, log=True, return_log=False):  # xi_0: 초기 추정값
+        x = np.asarray(xlist)
+        y = np.asarray(dlist)
+
+        #if y[-1] > y[0]: y = y[::-1]  # 반대 그래프의 경우 순서 뒤집기
+        #print(x)
+        
+        # 로그 스케일일 경우
+        fit_func = System.power
+        if log: 
+            fit_func = System.power_log
+            y = np.log(y)
+        '''
+        for idx in range(len(y)):
+            if idx == 0: continue
+            if np.isclose(y[idx], y[idx - 1], rtol=1e-8, atol=1e-10):
+                y = y[:idx]
+                x = x[:idx]
+                break
+        '''
+        '''
+        peak_idx_list = System.get_peak(y)
+        peak_idx = peak_idx_list[0]
+            
+        y = y[peak_idx + 2:]
+        x = x[peak_idx + 2:]
+        '''
+        # 피팅
+        parameters, covariance = curve_fit(
+            fit_func,
+            x,
+            y,
+            p0=[1, -1],
+            maxfev=100000
+        )
+
+        if return_log: fit_func = System.power_log
+        else: fit_func = System.power
+
+        x_fit = x
+        y_fit = fit_func(x_fit, *parameters)
+
+        parameter_errors = np.sqrt(np.diag(covariance))
+        
+        return parameters, parameter_errors, x_fit, y_fit

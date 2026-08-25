@@ -13,7 +13,7 @@ class Ribbon(System):
     def __init__(self, a, params):
         super().__init__(a, params)
         self.params[5] = int(params[5])
-        self.filename = f"Ribbon_delta={self.params[0]}_n={self.params[5]}.npz"
+        self.filename = f"Ribbon_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}"
         self.basis_num = int(2 * (self.params[5] + 1))  # spin 고려 안 한 기저 개수
         self.kmin, self.kmax = 0, 2 * np.pi / self.a
         self.klist = self.get_klist()
@@ -305,8 +305,9 @@ class Ribbon(System):
             else:
                 x = x_b
                 density = density_b
-
-            _, _, xi, _ = self.get_exp_dissolve_fit(x, density, log=log)
+            
+            parameters, param_errors, _, _ = self.get_exp_dissolve_fit(x, density, log=log)
+            _, _, xi, _ = parameters
             xi_list.append(xi)
 
         self.xi_data = xi_list, "xi", 0.5

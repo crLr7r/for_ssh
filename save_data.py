@@ -24,7 +24,7 @@ def save_eigen_data(model):
     evals_list, evecs_list = diagonalize(model)
 
     np.savez(
-        f"data/{model.filename}",
+        f"data/{model.filename}.npz",
         evals_list=np.asarray(evals_list),
         evecs_list=np.asarray(evecs_list),
     )

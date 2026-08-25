@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
-
+from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import MaxNLocator
 
 class DataPlot():
     @staticmethod
@@ -180,7 +181,7 @@ class DataPlot():
         x, y, d_func, size, d_min, d_max = rsd_2D_data
 
         # pcolormesh 그리기
-        model.set_title(title=title)
+        model.set_title()
         X, Y = np.meshgrid(x, y)
 
         D = np.zeros_like(X, dtype=float)
@@ -222,50 +223,57 @@ class DataPlot():
         ax.set_aspect('auto')
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        ax.set_title(model.title)
-        fig.savefig(f"images/{model.name}_rsd_2D({model.title}).png")
+        ax.set_title(model.title if title is None else title)
+        #fig.tight_layout()
+        fig.savefig(f"images/{model.name}_rsd_2D({model.title})(state#1800).png")
         plt.show()
 
     #임의의 데이터 그리는 용도
     @staticmethod
     def draw_any_data(model, data,
-                             ax=None, title="data", fig_size=(6.4, 4.8), is_last=True, log=False, x_inverse=False):
+                             ax=None, title="data", is_last=True, 
+                             xlog=False, ylog=False, base=2, x_inverse=False, error_bar=False, y_error=None):
         
-        xlist, xi_list, xlabel, ylabel, label, extra_data = data
+        xlist, ylist, xlabel, ylabel, label, extra_data = data
         model.set_title(title=title)
         
         if ax is None:
-            fig, ax = plt.subplots(figsize=fig_size)
+            fig, ax = plt.subplots()
         else:
             fig = ax.figure
+        
+        xtick_labels = xlist
+        
+        if x_inverse: 
+            xtick_labels = []
+            for x in xlist: xtick_labels.append(f"1/{round(x,0)}")
+            xlist = 1/np.asarray(xlist)
+        
+        if error_bar: ax.errorbar(xlist, ylist, yerr=y_error, fmt='o-', markersize=3, linewidth=1, color="black", label=label, capsize=3)
+        else: ax.plot(xlist, ylist, marker="o", markersize=3, linewidth=1, color="black", label=label)
+
+        xticks = [xlist[i] for i in np.linspace(0, len(xlist) - 1, min(len(xlist), 9), dtype=int)]
+        xtick_labels = [xtick_labels[i] for i in np.linspace(0, len(xtick_labels) - 1, min(len(xtick_labels), 9), dtype=int)]
         
         if extra_data is not None:
             x0 = extra_data[0]
             y0 = extra_data[1]
-            if log: y0 = np.log2(np.maximum(y0, 1e-13))
             ax.scatter(x0, y0, marker='x', s=50, color="red")
+            yscale = max(ylist) - min(ylist)
             ax.annotate(
                     f"ribbon band gap",
                     xy=(x0, y0),  # 가리킬 점의 실제 좌표
-                    xytext=(x0 + 0.001, y0 + 0.1),  # 텍스트가 나타날 좌표
+                    xytext=(x0 + 0.001, y0 + yscale/3),  # 텍스트가 나타날 좌표
                     arrowprops=dict(facecolor='red', edgecolor='red', shrink=0.05, width=0.5, headwidth=5),  # 화살표 옵션
                     color="red"
                 )
-        if log:
-            xi_list = np.log(np.maximum(xi_list, 1e-13))/np.log(2.668)
+            xticks = np.insert(xticks, 0, x0)
+            xtick_labels = np.insert(xtick_labels, 0, x0)
         
-        if x_inverse: 
-            xlist_inverse = 1/np.asarray(xlist)
-            xtick_labels = []
-            for x in xlist: xtick_labels.append(f"1/{round(x,0)}")
-            ax.plot(xlist_inverse, xi_list, marker="o",markersize=3,linewidth=1, color="black", label=label)
-            ax.set_xticks(np.insert(xlist_inverse, 0, 0) if extra_data is not None else xlist_inverse)
-            ax.set_xticklabels(np.insert(xtick_labels,0, 0) if extra_data is not None else xtick_labels)
-        else:
-            ax.set_xticks(xlist)
-            ax.set_xticklabels(xlist)
-            ax.plot(xlist, xi_list, marker="o", markersize=3, linewidth=1, color="black", label=label)
         
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xtick_labels)
+      
         ax.legend()
 
         if is_last:
@@ -274,15 +282,22 @@ class DataPlot():
                 ax.set_xlabel(f"{xlabel}(1/n)", size=15)
             else:
                 ax.set_xlabel(xlabel, size=15)
-            if log: 
-                ax.set_title(f"{model.title}(log scale)")
-                ax.set_ylabel(fr"$log_(2.668)$({ylabel})", size=15)
-            else: 
-                ax.set_title(model.title)
-                ax.set_ylabel(ylabel, size=15)
+
+            ax.set_ylabel(ylabel, size=15)
+            
+            if xlog: ax.set_xscale('log', base=base)
+            if ylog: ax.set_yscale('log', base=base)
+            
+            subtitle=""
+            if xlog and ylog: subtitle = "(log-log)"
+            elif xlog and not ylog: subtitle = "(xlog)"
+            elif ylog and not xlog: subtitle = "(ylog)"
+            
+            ax.set_title(f"{model.title}{subtitle}")
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.3e'))
             
             fig.tight_layout()
-            if log: fig.savefig(f"images/{model.name}_{title}(log) - {xlabel}.png")
-            else: fig.savefig(f"images/{model.name}_{title} - {xlabel}.png")
+            fig.savefig(f"images/{model.name}_{title}{subtitle} - {xlabel}.png")
+            
             plt.show()
             plt.close()

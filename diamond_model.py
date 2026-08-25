@@ -12,7 +12,7 @@ class Diamond(System):
     # 인스턴스 함수 정의--------------------------------------------------------------------------------------------
     def __init__(self, a, params):
         super().__init__(a, params)
-        self.filename = f"diamond_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}_m={self.params[6]}.npz"
+        self.filename = f"diamond_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_lda={self.params[3]}_B={self.params[4]}_n={self.params[5]}_m={self.params[6]}"
 
         self.params[5] = int(params[5])
         self.params[6] = int(params[6])
@@ -129,6 +129,7 @@ class Diamond(System):
         self.corner_states = [0, 1]
         E_list = [np.inf, np.inf]
         
+        # 가운데 6개 중에 절댓값이 제일 작은 2개를 고름
         for x in self.state_list[self.basis_num - 3:self.basis_num + 3]:
             E = self.evals_list[0][x]
             if np.abs(E) < E_list[0]:

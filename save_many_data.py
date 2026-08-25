@@ -37,7 +37,7 @@ if __name__ == "__main__":
         from diamond_model import Diamond
         # default
         a = 1
-        params = np.asarray([0, 1, 0.1, 0.2, 1, 30, 31])
+        params = np.asarray([0, 1, 0.1, 0.2, 1, 30, 30])
         #                    Δ  t  tSO  lda B  n   m
 
         param_idx = {
