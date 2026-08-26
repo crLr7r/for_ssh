@@ -48,18 +48,18 @@ if model_name == "Diamond":
         f.close()
 
     # 4. Density(2D) : corner state에 대한 density ---------------------------------------------------------
-    cstate = model.corner_states[0]
+    cstate = model.corner_states[1]
     rsd_2D_data = model.get_2D_rsd_data([cstate])
     x, y, d_func, _, _, _ = rsd_2D_data
 
     X, Y = np.meshgrid(x, y)
     
     with open(f"organized_data/2D_density/{model.filename}(state#{cstate}).txt", "w") as f:
-        f.write(f"{'x':<38}{'y':<10}{'weight':<30}\n")
+        f.write(f"{'x':<25}{'y':<10}{'weight':<30}\n")
         for i in range(X.shape[0]):
             for j in range(X.shape[1]):
                 x, y = X[i, j], Y[i, j]
-                f.write(f"{x:<25.16f}   {y:<10}{d_func(x, y):<30e}\n")
+                f.write(f"{x:<25.16f}{y:<10}{d_func(x, y):<30e}\n")
         f.close()
 
 

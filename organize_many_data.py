@@ -180,7 +180,7 @@ if __name__ == '__main__':
         xi_list, xi_err_list = get_xi(ldas, "lda")
 
         with open(f"organized_data/xi_lda/Diamond xi(lda=[0.1x2^{lda_power_bounds[0]}, 0.1x2^{lda_power_bounds[1]}]).txt", "w") as f:
-            f.write(f"{'lda':<17}{'xi':<40}{'error':<20}\n")
+            f.write(f"{'lda':<15}{'xi':<30}{'error':<20}\n")
             for i, lda in enumerate(ldas):
                 f.write(f"{lda:<15.5f}{xi_list[i]:<30.16f}{xi_err_list[i]:<20}\n")
 
@@ -189,6 +189,6 @@ if __name__ == '__main__':
 
         with open(f"organized_data/xi_lda_fit/Diamond xi fit(lda=[0.1x2^{lda_power_bounds[0]}, 0.1x2^{lda_power_bounds[1]}]).txt", "w") as f:
             f.write(f"{A:.4f}lambda^{alpha:.4f}\n")
-            f.write(f"{'lda':<17}{'xi':<40}{'error':<20}\n")
+            f.write(f"{'lda':<15}{'xi':<30}{'error':<20}\n")
             for i, lda in enumerate(ldas):
                 f.write(f"{lda:<15.5f}{xi_list[i]:<30.16f}{xi_err_list[i]:<20}\n")
