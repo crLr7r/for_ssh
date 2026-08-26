@@ -117,7 +117,7 @@ if __name__ == '__main__':
             x_fit = x[:len(x)//2]
             d_fit = density_list[0][:len(density_list[0])//2]
 
-            parameters, param_errors, x_fit, d_fit = model.get_exp_dissolve_fit(x_fit, d_fit, log=True, return_log=True)
+            parameters, param_errors, x_fit, d_fit = model.get_exp_dissolve_fit(x_fit, d_fit, log=True, return_log=False)
             A, B, xi, C = parameters
             A_err, B_err, xi_err, C_err = param_errors
 

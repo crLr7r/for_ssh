@@ -52,7 +52,7 @@ if __name__ == '__main__':
         #print(f"E1={model.evals_list[0][states[0]]:.14f}, E2={model.evals_list[0][states[1]]:.14f}")
         model.get_total_density(states[0], do_print=False)
 
-        state_num = states[1] - 1000
+        state_num = states[1] -1000
         extra = [(1, 1, 1), (0, 1, 1)]
         a = [(0,0,0), (0,1,0), (0,2,0)]
         b = [(1,0,0), (1,0,1), (1,0,2)]
