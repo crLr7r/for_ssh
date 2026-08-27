@@ -4,9 +4,12 @@ from system_model import System
 import sys
 from diamond_model import Diamond
 
+# 해당 파일 실행 방법: python organize_many_data.py (어떤 그래프를 그릴건지)
+# ex) python organize_many_data.py band_gap / python organize_many_data.py splitting / python organize_many_data.py xi
+
 if __name__ == '__main__':
     
-    graph = sys.argv[1]     # ex) python organize_many_data.py band_gap / python organize_many_data.py splitting / python organize_many_data.py xi
+    graph = sys.argv[1]
 
     # default
     a = 1

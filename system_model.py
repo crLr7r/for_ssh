@@ -1,7 +1,11 @@
+import os
+from save_data import save_eigen_data
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 from scipy.optimize import curve_fit
+
+# 실행용 파일 아님
 
 class System(ABC):
     # 클래스 변수 -----------------------------------------------------------
@@ -48,10 +52,19 @@ class System(ABC):
     def H(self, k, k_y=0):
         pass
 
-    def load_eigen_data(self):
-        with np.load(f"data/{self.filename}.npz") as data:
-            self.evals_list = data["evals_list"]
-            self.evecs_list = data["evecs_list"]
+    def load_eigen_data(self, type="npz"):
+        if type == "npz":
+            path = f"data/{self.filename}.npz"
+            if not os.path.exists(path):
+                print(f"file does not exist; saving data first...({self.filename})")
+                save_eigen_data(self)
+
+            with np.load(path) as data:
+                self.evals_list = data["evals_list"]
+                self.evecs_list = data["evecs_list"]
+
+        elif type == "txt":
+            pass
 
     # 어떤 state에 대한 total density를 리턴하는 함수(1인지 확인용)
     def get_total_density(self, state, k=0, do_print=True):
@@ -172,15 +185,15 @@ class System(ABC):
                     x = x[:idx]
                     break
             '''
-            
+
             peak_idx_list = System.get_peak(y)
 
             if len(peak_idx_list) > 0:
                 peak_idx = peak_idx_list[0]
             
-                y = y[peak_idx + 2:]
-                x = x[peak_idx + 2:]
-            
+                y = y[peak_idx:]
+                x = x[peak_idx:]
+
         # 피팅
         parameters, covariance = curve_fit(
             fit_func,

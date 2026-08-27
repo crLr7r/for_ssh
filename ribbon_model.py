@@ -1,5 +1,6 @@
 from system_model import System
 import numpy as np
+# 실행용 파일 아님
 
 class Ribbon(System):
     # 클래스 변수 -----------------------------------------------------------

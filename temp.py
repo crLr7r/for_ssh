@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.linalg import null_space
 
+#더이상 안 쳐다볼 것 같은 파일
+
 Del, lam, t_SO, t = 0, 0.2, 0.1, 1
 
 Da = np.array([[Del, -1j*lam], [1j*lam, Del]])

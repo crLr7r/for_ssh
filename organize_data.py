@@ -4,9 +4,12 @@ from diamond_model import Diamond
 from ribbon_model import Ribbon
 import sys
 
+# 해당 파일 실행 방법: python organize_data.py (시스템 이름) (a) (Delta) (t) (t_SO) (lda) (B) (n) (m)
+# ex) Diamond 1 0 1 0.1 0.2 1 30 31 / Ribbon 1 0 1 0.1 0.2 1 55
+
 model_name, a, params = (sys.argv[1],
                                  float(sys.argv[2]),
-                                 [float(x) for x in sys.argv[3:]])      # python organize_data.py Diamond 1 0 1 0.1 0.2 1 30 30 <<이런식으로 입력하면 됨
+                                 [float(x) for x in sys.argv[3:]])
 
 if model_name == "Diamond":
     # Diamond 1 0 1 0.1 0.2 1 30 31 (a Delta t t_SO lda B n m)

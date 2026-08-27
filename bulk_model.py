@@ -1,6 +1,7 @@
 from system_model import System
 import numpy as np
 
+#실행용 파일 아님
 class Bulk(System):
     # 클래스 변수 -----------------------------------------------------------
     KPOINTS = 501

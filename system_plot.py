@@ -4,6 +4,8 @@ from matplotlib import colors
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.ticker import MaxNLocator
 
+#실행용(main으로 돌릴) 파일 아님
+
 class DataPlot():
     @staticmethod
     # kspace에서 그래프 그리는 기반
@@ -230,12 +232,11 @@ class DataPlot():
 
     #임의의 데이터 그리는 용도
     @staticmethod
-    def draw_any_data(model, data,
+    def draw_any_data(system, data,
                              ax=None, title="data", is_last=True, 
                              xlog=False, ylog=False, base=2, x_inverse=False, error_bar=False, y_error=None):
         
-        xlist, ylist, xlabel, ylabel, label, extra_data = data
-        model.set_title(title=title)
+        xlist, ylist, xlabel, ylabel, fix_param_label, fix_param, extra_data = data
         
         if ax is None:
             fig, ax = plt.subplots()
@@ -249,8 +250,8 @@ class DataPlot():
             for x in xlist: xtick_labels.append(f"1/{round(x,0)}")
             xlist = 1/np.asarray(xlist)
         
-        if error_bar: ax.errorbar(xlist, ylist, yerr=y_error, fmt='o-', markersize=3, linewidth=1, color="black", label=label, capsize=3)
-        else: ax.plot(xlist, ylist, marker="o", markersize=3, linewidth=1, color="black", label=label)
+        if error_bar: ax.errorbar(xlist, ylist, yerr=y_error, fmt='o-', markersize=3, linewidth=1, color="black", label=fix_param_label, capsize=3)
+        else: ax.plot(xlist, ylist, marker="o", markersize=3, linewidth=1, color="black", label=fix_param_label)
 
         xticks = [xlist[i] for i in np.linspace(0, len(xlist) - 1, min(len(xlist), 9), dtype=int)]
         xtick_labels = [xtick_labels[i] for i in np.linspace(0, len(xtick_labels) - 1, min(len(xtick_labels), 9), dtype=int)]
@@ -293,11 +294,11 @@ class DataPlot():
             elif xlog and not ylog: subtitle = "(xlog)"
             elif ylog and not xlog: subtitle = "(ylog)"
             
-            ax.set_title(f"{model.title}{subtitle}")
+            ax.set_title(f"{title}{subtitle}")
             ax.yaxis.set_major_formatter(FormatStrFormatter('%.3e'))
             
             fig.tight_layout()
-            fig.savefig(f"images/{model.name}_{title}{subtitle} - {xlabel}.png")
+            fig.savefig(f"images/{system.name}_{title}{subtitle} - {xlabel}({fix_param}).png")
             
             plt.show()
             plt.close()

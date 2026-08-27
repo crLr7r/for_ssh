@@ -1,6 +1,8 @@
 import numpy as np
 import sys
-
+import os
+# 해당 파일 실행 방법: python save_data.py (시스템 이름) (a) (Delta) (t) (t_SO) (lda) (B) (n) (m)
+# ex) Diamond 1 0 1 0.1 0.2 1 30 31 / Ribbon 1 0 1 0.1 0.2 1 55
 
 def diagonalize(model, do_print=False):
     evals_list, evecs_list = [], []
@@ -22,12 +24,17 @@ def diagonalize(model, do_print=False):
 def save_eigen_data(model):
 
     evals_list, evecs_list = diagonalize(model)
+    path = f"data/{model.filename}.npz"
 
-    np.savez(
-        f"data/{model.filename}.npz",
-        evals_list=np.asarray(evals_list),
-        evecs_list=np.asarray(evecs_list),
-    )
+    if os.path.exists(path):
+        print("file already exists")
+
+    else:
+        np.savez(
+            path,
+            evals_list=np.asarray(evals_list),
+            evecs_list=np.asarray(evecs_list),
+        )
 
 if __name__ == "__main__":
     model_name, a, params = (sys.argv[1],

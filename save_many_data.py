@@ -1,6 +1,9 @@
 import numpy as np
 import sys
+# loop을 돌면서 파일을 저장하는 코드인데 시간이 넘쳐날때만 사용하기
 
+# 해당 파일 실행 방법: python save_many_data.py (시스템명) (vary할 변수이름)
+# ex) Diamond size / Diamond lda
 
 def diagonalize(model, do_print=False):
     evals_list, evecs_list = [], []
