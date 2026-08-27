@@ -4,6 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 from scipy.optimize import curve_fit
+from PATH import DATA_DIR
 
 # 실행용 파일 아님
 
@@ -54,7 +55,7 @@ class System(ABC):
 
     def load_eigen_data(self, type="npz"):
         if type == "npz":
-            path = f"data/{self.filename}.npz"
+            path = f"{DATA_DIR}/{self.filename}.npz"
             if not os.path.exists(path):
                 print(f"file does not exist; saving data first...({self.filename})")
                 save_eigen_data(self)
