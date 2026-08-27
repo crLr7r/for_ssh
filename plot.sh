@@ -3,7 +3,7 @@
 echo " "
 echo "Job started at `date`"
 
-python3 plot_data.py "$@"
+python3 python_code/plot_data.py "$@"
 
 echo " "
 echo "Job ended at `date`"

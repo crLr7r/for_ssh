@@ -6,16 +6,15 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --time=24:00:00
-#SBATCH --output=out/v2.o%j
-#SBATCH --error=out/v2.o%j
+#SBATCH --output=v2.o%j
+#SBATCH --error=v2.o%j
 
 cd $SLURM_SUBMIT_DIR
 echo " "
 echo "Job started at `date`"
 
-python3 python_code/save_many_data.py "$@"
+python3 python_code/organize_many_data.py "$@"
 
 echo " "
 echo "Job ended at `date`"
 echo " "
-
