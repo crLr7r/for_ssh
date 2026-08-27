@@ -13,7 +13,7 @@ class System(ABC):
 
     # 인스턴스 함수 정의--------------------------------------------------------
     @abstractmethod
-    def __init__(self, a, params):  # params과 param_vals은 일대일 대응
+    def __init__(self, a, params):  # params과 param_names는 일대일 대응
 
         self.a = a
         self.params = params

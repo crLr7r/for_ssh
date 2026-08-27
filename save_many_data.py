@@ -76,7 +76,8 @@ if __name__ == "__main__":
 
         param_idx = {
             't_SO': 2,
-            'lda': 3
+            'lda': 3,
+            'size': 5
         }
 
         if variation_param == 'size':
@@ -87,12 +88,9 @@ if __name__ == "__main__":
         for value in variation_values:
             new_params = params.copy()
 
-            if variation_param == 'size':
-                new_params[5:7] = [value, value]
-            else:
-                new_params[param_idx[variation_param]] = round(value,1)
+            new_params[param_idx[variation_param]] = round(value,1)
 
-            model = Diamond(a, new_params)    
+            model = Ribbon(a, new_params)
             save_eigen_data(model)
 
     if model_name == 'Bulk':

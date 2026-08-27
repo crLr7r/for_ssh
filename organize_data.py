@@ -26,7 +26,7 @@ if model_name == "Diamond":
     # 2. Diamond cornerstate eigenvalue & eigenvector -----------------------------------------------------
     model.set_corner_states()
     cstate = model.corner_states[0]
-    with open(f"organized_data/Corner_states eigenvalue&eigenvector/{model.filename}(state#{cstate}).txt", "w") as f:
+    with open(f"organized_data/Corner_states_data/{model.filename}(state#{cstate}).txt", "w") as f:
         f.write(f"state#={cstate:<10}\nE={model.evals_list[0][cstate]:<20}\n")
         for i in model.state_list:
             elt = model.evecs_list[0][cstate][i]
