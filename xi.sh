@@ -13,7 +13,7 @@ cd $SLURM_SUBMIT_DIR
 echo " "
 echo "Job started at `date`"
 
-python3 python_code/plot_xi.py "$@"
+python3 ./python_code/plot_xi.py "$@"
 
 echo " "
 echo "Job ended at `date`"
