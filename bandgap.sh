@@ -13,7 +13,7 @@ cd $SLURM_SUBMIT_DIR
 echo " "
 echo "Job started at `date`"
 
-python3 ./python_code/plot_band_gap.py "$@"
+python3 fhl-home/for_ssh/python_code/plot_band_gap.py "$@"
 
 echo " "
 echo "Job ended at `date`"

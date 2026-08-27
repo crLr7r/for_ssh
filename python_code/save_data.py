@@ -24,7 +24,7 @@ def diagonalize(model, do_print=False):
 def save_eigen_data(model):
 
     evals_list, evecs_list = diagonalize(model)
-    path = f"../data/{model.filename}.npz"
+    path = f"data/{model.filename}.npz"
 
     if os.path.exists(path):
         print("file already exists")

@@ -54,7 +54,7 @@ class System(ABC):
 
     def load_eigen_data(self, type="npz"):
         if type == "npz":
-            path = f"../data/{self.filename}.npz"
+            path = f"data/{self.filename}.npz"
             if not os.path.exists(path):
                 print(f"file does not exist; saving data first...({self.filename})")
                 save_eigen_data(self)
