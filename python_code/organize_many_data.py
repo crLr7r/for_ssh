@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # default
     a = 1
-    params = [0.0, 1.0, 0.1, 0.2, 1.0, 30.0, 30.0]
+    params = [0.0, 1.0, 0.1, 0.05, 1.0, 30.0, 30.0]
     #         Δ    t    tSO  lda  B    n     m
     n,m = int(params[5]), int(params[6])
     param_idx = {
@@ -22,8 +22,8 @@ if __name__ == '__main__':
         'lda': 3
     }
     
-    size_bounds = [32, 64]
-    size_count = 10
+    size_bounds = [15, 64]
+    size_count = 50
 
     lda_power_bounds = [-4, 2]
 
@@ -157,7 +157,7 @@ if __name__ == '__main__':
         sizes = [int(value) for value in sizes]
         split_list = get_splitting(sizes, "size")
 
-        with open(f"{ORGANIZED_DIR}/Splitting_size/Diamond splitting(size=[{size_bounds[0],size_bounds[1]}], count={size_count}).txt", "w") as f:
+        with open(f"{ORGANIZED_DIR}/Splitting_size/Diamond splitting(size=[{size_bounds[0],size_bounds[1]}], count={size_count})(lda={params[3]}).txt", "w") as f:
             f.write(f"{'size(n)':<10}{'Splitting (E/t)':<30}")
             f.write(f"lambda={params[3]}\n")
             for i, size in enumerate(sizes):
@@ -170,7 +170,7 @@ if __name__ == '__main__':
         A = np.exp(intercept)
         split_fit = A * np.exp(-np.asarray(sizes) / xi)
         
-        with open(f"{ORGANIZED_DIR}/Splitting_size_fit/Diamond splitting fit(size=[{size_bounds[0],size_bounds[1]}], count={size_count}).txt", "w") as f:
+        with open(f"{ORGANIZED_DIR}/Splitting_size_fit/Diamond splitting fit(size=[{size_bounds[0],size_bounds[1]}], count={size_count})(lda={params[3]}).txt", "w") as f:
             f.write(f"xi={xi}\n")
             f.write(f"{'size(n)':<10}{'Splitting fit (E/t)':<30}")
             f.write(f"lambda={params[3]}\n")

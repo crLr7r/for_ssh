@@ -1,0 +1,31 @@
+save.sh (system name) (a) (Delta) (t) (t_SO) (lda) (B) (n) (m)
+	ex) sbatch save.sh Diamond 1 0 1 0.1 0.2 1 30 30
+
+plot.sh (system name) (a) (Delta) (t) (t_SO) (lda) (B) (n) (m)
+	ex) bash plot.sh Diamond 1 0 1 0.1 0.2 1 30 30
+
+save_many.sh (system name) (varying parameter)
+	ex) bash save_many.sh Diamond lda
+	ex) bash save_many.sh Diamond size
+
+splitting.sh (varying parameter) (start) (stop) (count)
+	ex) bash spltting.sh size 15 64 50 //n=15부터 n=64까지 50개의 size
+	ex) bash splitting.sh lda -4 1 6 //람다는 지수 기준(2^p)
+
+bandgap.sh (varying parameter) (start) (stop) (count)
+	ex) bash bandgap.sh size 15 64 50 //n=15부터 n=64까지 50개의 size
+	ex) bash bandgap.sh lda -4 1 6 //람다는 지수 기준(2^p)
+
+xi.sh (varying parameter) (start) (stop) (count)
+	ex) bash xi.sh size 15 64 50 //n=15부터 n=64까지 50개의 size
+	ex) bash xi.sh lda -4 1 6 //람다는 지수 기준(2^p)
+
+organize.sh (system name) (a) (Delta) (t) (t_SO) (lda) (B) (n) (m)
+	ex) bash organize.sh Diamond 1 0 1 0.1 0.2 1 30 30
+	ex) bash organize.sh Ribbon 1 0 1 0.1 0.2 1 55
+
+
+organize_many.sh (graph)
+	ex) bash organize_many.sh band_gap
+	ex) bash organize_many.sh splitting
+	ex) bash organize_many.sh xi
