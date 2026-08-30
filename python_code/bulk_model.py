@@ -15,7 +15,7 @@ class Bulk(System):
         super().__init__(a, params)
         self.k_y = k_y
 
-        self.filename = f"bulk_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_k_y={self.k_y}.npz"
+        self.filename = f"bulk_delta={self.params[0]}_t={self.params[1]}_t_SO={self.params[2]}_k_y={self.k_y}"
         self.basis_num = 2    # spin 고려 안 한 기저 개수
         self.kmin, self.kmax = 0, 4 * np.pi / self.a
         self.klist = self.get_klist()
@@ -31,8 +31,8 @@ class Bulk(System):
 
         H = np.array([[f_SO+Delta, 0, g, 0],
                              [0, -f_SO+Delta, 0, g],
-                             [g, 0, -f_SO-Delta, 0],
-                             [0, g, 0, f_SO-Delta]])
+                             [np.conj(g), 0, -f_SO-Delta, 0],
+                             [0, np.conj(g), 0, f_SO-Delta]])
         #print(H)
         return H
 

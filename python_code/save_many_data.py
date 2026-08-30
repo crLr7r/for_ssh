@@ -100,7 +100,7 @@ if __name__ == "__main__":
     if model_name == 'Bulk':
         #Bulk 1 0 1 0.1
         from bulk_model import Bulk
-        a, params = 1, 0, 1, 0.1
+        a, params = 1, [0, 1, 0.1]
         for k_y in np.linspace(0, 2*np.pi/(np.sqrt(3)*a) , 3):
             model = Bulk(a, params, k_y=k_y)
             save_eigen_data(model)

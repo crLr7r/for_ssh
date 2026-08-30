@@ -24,18 +24,17 @@ def diagonalize(model, do_print=False):
 
 def save_eigen_data(model):
 
-    evals_list, evecs_list = diagonalize(model)
     path = f"{DATA_DIR}/{model.filename}.npz"
 
     if os.path.exists(path):
         print("file already exists")
-
     else:
+        evals_list, evecs_list = diagonalize(model)
         np.savez(
             path,
             evals_list=np.asarray(evals_list),
-            evecs_list=np.asarray(evecs_list),
-        )
+                evecs_list=np.asarray(evecs_list),
+            )
 
 if __name__ == "__main__":
     model_name, a, params = (sys.argv[1],

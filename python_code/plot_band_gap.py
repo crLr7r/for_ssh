@@ -9,7 +9,7 @@ from plot_data import DataPlot
 # 해당 파일 실행 방법: python plot_band_gap.py (vary할 변수) (변수 시작값) (변수 끝값) (개수)
 # ex) python plot_band_gap.py size 15 64 50
 
-var_param, bounds, count = (sys.argv[1], [float(x) for x in sys.argv[2:4]], sys.argv[4])
+var_param, bounds, count = (sys.argv[1], [float(x) for x in sys.argv[2:4]], int(sys.argv[4]))
 
 # default
 a = 1
